@@ -1,0 +1,15 @@
+appId: dev.aiinterpreter.app
+productName: AI Interpreter
+directories:
+  output: release
+files:
+  - out/**
+  - package.json
+win:
+  target:
+    - nsis
+nsis:
+  oneClick: false
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: true
+publish: null
