@@ -1,21 +1,88 @@
-MIT License
+AI Interpreter Source Available License
 
-Copyright (c) 2026 Anton Minin Baranovskii
+Copyright © 2026 Anton Minin Baranovskii. All rights reserved.
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+This license governs use of the accompanying software and its source code (the
+"Software"). The Software is source-available, not open source. By downloading,
+installing, using, viewing, building, or contributing to the Software, you agree
+to the terms below. If you do not agree, do not use the Software.
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+1. Definitions
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+   "Author" means Anton Minin Baranovskii, the copyright holder.
+   "Software" means the AI Interpreter application together with its source code,
+   documentation, and related files distributed under this license.
+   "You" means the individual or entity exercising rights under this license.
+
+2. Permitted use
+
+   Subject to the restrictions in Section 3, the Author grants You a
+   non-exclusive, worldwide, royalty-free, non-transferable license to:
+
+   (a) download, install, and use the Software free of charge for personal or
+       internal purposes;
+   (b) view and study the source code;
+   (c) build the Software from source for Your own personal use;
+   (d) submit contributions (for example, Pull Requests) to the official
+       project, subject to Section 5.
+
+3. Restrictions
+
+   You may NOT:
+
+   (a) copy, reuse, port, or incorporate the source code or any substantial
+       part of it into any other project or product;
+   (b) create, publish, or distribute modified versions of the Software as a
+       separate or competing product;
+   (c) use the source code, in whole or in substantial part, in any commercial
+       product or service without prior written permission from the Author;
+   (d) sell, rent, lease, sublicense, relicense, or repackage the Software or
+       its source code;
+   (e) remove, alter, or obscure this license, the copyright notice, or any
+       attribution contained in the Software.
+
+   Nothing in this license grants You any right to the Author's trademarks,
+   service marks, product names, or branding.
+
+4. Redistribution of official builds
+
+   You may share unmodified official builds of the Software as published by the
+   Author, provided You do not charge for them, do not remove this license or
+   the copyright notice, and do not present them as Your own.
+
+5. Contributions
+
+   If You submit any contribution to the Software (including code, documentation,
+   or other materials), You grant the Author a perpetual, worldwide,
+   non-exclusive, royalty-free, irrevocable license to use, reproduce, modify,
+   distribute, sublicense, and relicense that contribution as part of the
+   Software. You represent that You have the right to grant this license. All
+   contributions become part of the Software and are distributed under this same
+   license.
+
+6. Reservation of rights
+
+   All rights not expressly granted in this license are reserved by the Author.
+   The Author may grant separate commercial or other licenses on different terms
+   upon written agreement.
+
+7. Termination
+
+   This license terminates automatically if You breach any of its terms. Upon
+   termination You must stop using the Software and destroy all copies in Your
+   possession. Sections 3, 5, 6, 8, and 9 survive termination.
+
+8. Disclaimer of warranty
+
+   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+   IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+   FITNESS FOR A PARTICULAR PURPOSE, AND NONINFRINGEMENT.
+
+9. Limitation of liability
+
+   IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER
+   LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT, OR OTHERWISE, ARISING FROM,
+   OUT OF, OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+   SOFTWARE.
+
+For commercial licensing or permissions beyond this license, contact the Author.

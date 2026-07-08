@@ -1,13 +1,31 @@
 {
   "name": "ai-interpreter",
-  "version": "0.1.0",
-  "description": "Free and open-source real-time AI interpreter for online meetings",
+  "version": "0.1.0-alpha",
+  "description": "Free, source-available real-time AI interpreter for online meetings",
   "main": "out/main/index.js",
   "author": "Anton Minin Baranovskii",
-  "license": "MIT",
+  "license": "SEE LICENSE IN LICENSE",
+  "homepage": "https://github.com/anton-minin/ai-interpreter#readme",
+  "bugs": {
+    "url": "https://github.com/anton-minin/ai-interpreter/issues"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/anton-minin/ai-interpreter.git"
+  },
+  "keywords": [
+    "interpreter",
+    "translation",
+    "speech-to-text",
+    "text-to-speech",
+    "zoom",
+    "google-meet",
+    "microsoft-teams",
+    "electron",
+    "ai"
+  ],
+  "engines": {
+    "node": ">=20"
   },
   "scripts": {
     "dev": "electron-vite dev",

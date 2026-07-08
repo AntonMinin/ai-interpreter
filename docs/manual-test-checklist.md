@@ -5,6 +5,9 @@ Run before every release on a clean-ish Windows machine. Items marked (mock) nee
 ## Startup & onboarding
 
 - [ ] (mock) Fresh install/first run opens the onboarding wizard
+- [ ] (mock) Interface language selector on wizard step 1 switches the UI to Russian and back to English immediately
+- [ ] (mock) Interface language set in Settings persists across app restarts
+- [ ] (mock) Changing the interface language does not change the translation languages (and vice versa)
 - [ ] (mock) Wizard: microphone selection lists devices; "Allow microphone access" prompts and succeeds
 - [ ] (mock) Wizard step 2: level meter moves while speaking; confirmation text appears
 - [ ] (mock) Wizard: selecting Mock provider allows finishing without any key

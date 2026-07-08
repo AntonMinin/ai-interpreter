@@ -10,6 +10,7 @@ export interface DirectionSettings {
 
 export interface Settings {
   onboardingComplete: boolean
+  interfaceLanguage: string
   outbound: DirectionSettings
   inbound: DirectionSettings & { speak: boolean; subtitles: boolean }
   micDeviceId: string
@@ -36,6 +37,7 @@ export interface Settings {
 
 export const DEFAULT_SETTINGS: Settings = {
   onboardingComplete: false,
+  interfaceLanguage: 'en',
   outbound: { enabled: true, sourceLanguage: 'ru', targetLanguage: 'en' },
   inbound: {
     enabled: false,

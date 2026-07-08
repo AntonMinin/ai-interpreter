@@ -43,6 +43,10 @@ Run **Diagnostics** (top navigation) first — it checks the microphone, permiss
 
 - Disable the meeting app's noise suppression / auto gain for the CABLE microphone (Zoom and Teams both apply it by default).
 
+## The app is in the wrong language
+
+Settings → **Interface language** (Настройки → **Язык интерфейса**) switches the UI between English and Russian. This does not affect the translation languages — those are under "Translation directions".
+
 ## Where are the logs?
 
 Settings → "Show log file location". Attach relevant lines to bug reports; logs contain no API keys and no audio.
