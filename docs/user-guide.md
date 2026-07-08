@@ -1,5 +1,11 @@
 # User Guide
 
+> AI Interpreter is in **early alpha**. It works, but expect rough edges — please report anything confusing via GitHub Issues.
+
+## Interface language
+
+The app interface is available in **English** and **Русский**. Choose it on the first screen of the setup wizard or any time in **Settings → Interface language**. This is only the language of the app itself — it is completely independent of the speech translation languages (what you speak and what the meeting hears), which are configured separately under "Translation directions". The choice is saved between launches.
+
 ## What you need
 
 1. **Windows 10/11** and a microphone (a headset is strongly recommended).
@@ -10,7 +16,7 @@ No key yet? Choose the **Mock provider** during onboarding to explore the app of
 
 ## First run
 
-The setup wizard walks you through: microphone choice → "say the test phrase" check → provider + API key → translation test → voice test → virtual microphone setup → meeting app instructions. You can re-run any check later from **Diagnostics**.
+The setup wizard walks you through: interface language + microphone choice → "say the test phrase" check → provider + API key → translation test → voice test → virtual microphone setup → meeting app instructions → Ready. You can re-run any check later from **Diagnostics**.
 
 ## Modes
 

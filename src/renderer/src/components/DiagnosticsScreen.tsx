@@ -1,10 +1,12 @@
 import { useCallback, useEffect, useState } from 'react'
 import type { DiagnosticItem, Settings } from '../../../shared/types'
 import { findVirtualCable, listDevices, requestMicPermission } from '../audio/devices'
+import { useT } from '../i18n'
 
 const ICONS = { ok: '✅', warning: '⚠️', error: '❌' } as const
 
 export function DiagnosticsScreen({ settings }: { settings: Settings }): React.JSX.Element {
+  const t = useT()
   const [items, setItems] = useState<DiagnosticItem[] | null>(null)
   const [running, setRunning] = useState(false)
 
@@ -15,14 +17,13 @@ export function DiagnosticsScreen({ settings }: { settings: Settings }): React.J
     const micAllowed = await requestMicPermission()
     results.push(
       micAllowed
-        ? { id: 'mic-perm', label: 'Microphone access', status: 'ok', message: 'Permission granted.' }
+        ? { id: 'mic-perm', label: t('diag.micPerm'), status: 'ok', message: t('diag.micPermOk') }
         : {
             id: 'mic-perm',
-            label: 'Microphone access',
+            label: t('diag.micPerm'),
             status: 'error',
-            message: 'Microphone access is blocked.',
-            action:
-              'Open Windows Settings → Privacy & security → Microphone and allow desktop apps to access the microphone.'
+            message: t('diag.micPermFail'),
+            action: t('diag.micPermAction')
           }
     )
 
@@ -31,16 +32,16 @@ export function DiagnosticsScreen({ settings }: { settings: Settings }): React.J
       devices.inputs.length > 0
         ? {
             id: 'mic-present',
-            label: 'Microphone found',
+            label: t('diag.micFound'),
             status: 'ok',
-            message: `${devices.inputs.length} input device(s) available.`
+            message: t('diag.micFoundOk', { n: devices.inputs.length })
           }
         : {
             id: 'mic-present',
-            label: 'Microphone found',
+            label: t('diag.micFound'),
             status: 'error',
-            message: 'No microphone detected.',
-            action: 'Plug in a microphone or headset and click "Run checks again".'
+            message: t('diag.micFoundFail'),
+            action: t('diag.micFoundAction')
           }
     )
 
@@ -48,33 +49,32 @@ export function DiagnosticsScreen({ settings }: { settings: Settings }): React.J
     if (!cable) {
       results.push({
         id: 'cable',
-        label: 'Virtual audio cable',
+        label: t('diag.cable'),
         status: 'error',
-        message: 'No virtual audio cable detected (VB-CABLE or similar).',
-        action:
-          'Install the free VB-CABLE driver from vb-audio.com/Cable, reboot, then run checks again. Without it, the meeting cannot hear your translated voice.'
+        message: t('diag.cableFail'),
+        action: t('diag.cableAction')
       })
     } else {
       results.push({
         id: 'cable',
-        label: 'Virtual audio cable',
+        label: t('diag.cable'),
         status: 'ok',
-        message: `Detected: ${cable.label}`
+        message: t('diag.cableOk', { label: cable.label })
       })
       if (!settings.virtualOutputDeviceId) {
         results.push({
           id: 'cable-selected',
-          label: 'Virtual output selected',
+          label: t('diag.cableSelected'),
           status: 'warning',
-          message: 'A virtual cable is installed but not selected as the translation output.',
-          action: `Open Settings and choose "${cable.label}" as the virtual microphone output.`
+          message: t('diag.cableSelectedWarn'),
+          action: t('diag.cableSelectedAction', { label: cable.label })
         })
       } else {
         results.push({
           id: 'cable-selected',
-          label: 'Virtual output selected',
+          label: t('diag.cableSelected'),
           status: 'ok',
-          message: 'Translation output is routed to the virtual cable.'
+          message: t('diag.cableSelectedOk')
         })
       }
     }
@@ -82,17 +82,17 @@ export function DiagnosticsScreen({ settings }: { settings: Settings }): React.J
     if (settings.outbound.enabled || settings.inbound.enabled) {
       results.push({
         id: 'directions',
-        label: 'Translation directions',
+        label: t('diag.directions'),
         status: 'ok',
-        message: 'At least one translation direction is enabled.'
+        message: t('diag.directionsOk')
       })
     } else {
       results.push({
         id: 'directions',
-        label: 'Translation directions',
+        label: t('diag.directions'),
         status: 'warning',
-        message: 'Both translation directions are disabled.',
-        action: 'Enable at least one direction in Settings.'
+        message: t('diag.directionsWarn'),
+        action: t('diag.directionsAction')
       })
     }
 
@@ -102,15 +102,15 @@ export function DiagnosticsScreen({ settings }: { settings: Settings }): React.J
     } catch {
       results.push({
         id: 'main-diag',
-        label: 'Provider checks',
+        label: t('diag.providerChecks'),
         status: 'error',
-        message: 'Could not run provider checks.'
+        message: t('diag.mainFail')
       })
     }
 
     setItems(results)
     setRunning(false)
-  }, [settings])
+  }, [settings, t])
 
   useEffect(() => {
     void run()
@@ -118,9 +118,9 @@ export function DiagnosticsScreen({ settings }: { settings: Settings }): React.J
 
   return (
     <div className="panel" style={{ maxWidth: 720 }}>
-      <h2>Audio & connection diagnostics</h2>
+      <h2>{t('diag.title')}</h2>
       {items === null ? (
-        <p className="hint">Running checks…</p>
+        <p className="hint">{t('diag.running')}</p>
       ) : (
         <div>
           {items.map((item) => (
@@ -137,12 +137,12 @@ export function DiagnosticsScreen({ settings }: { settings: Settings }): React.J
       )}
       <div style={{ marginTop: 16, display: 'flex', gap: 8 }}>
         <button onClick={() => void run()} disabled={running}>
-          Run checks again
+          {t('diag.runAgain')}
         </button>
         <button
           onClick={() => void window.interpreter.openExternal('https://vb-audio.com/Cable/')}
         >
-          Get VB-CABLE (free)
+          {t('diag.getCable')}
         </button>
       </div>
     </div>

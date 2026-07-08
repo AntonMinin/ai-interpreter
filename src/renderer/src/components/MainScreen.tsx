@@ -1,6 +1,7 @@
 import type { PipelineStatus, Settings, TranscriptEntry } from '../../../shared/types'
 import { languageName } from '../../../shared/languages'
 import type { AudioDevice } from '../audio/devices'
+import { useT } from '../i18n'
 import { LevelMeter } from './LevelMeter'
 import { StatusBadge } from './StatusBadge'
 import { TranscriptPanel } from './TranscriptPanel'
@@ -30,21 +31,23 @@ function deviceLabel(devices: AudioDevice[], deviceId: string, fallback: string)
 
 export function MainScreen(props: MainScreenProps): React.JSX.Element {
   const { settings, devices } = props
+  const t = useT()
+
   const modeParts: string[] = []
   if (settings.outbound.enabled) {
     modeParts.push(
-      `${languageName(settings.outbound.sourceLanguage)} → ${languageName(settings.outbound.targetLanguage)} (voice)`
+      `${languageName(settings.outbound.sourceLanguage)} → ${languageName(settings.outbound.targetLanguage)} (${t('main.voice')})`
     )
   }
   if (settings.inbound.enabled) {
     const extras = [
-      settings.inbound.subtitles ? 'subtitles' : null,
-      settings.inbound.speak ? 'voice' : null
+      settings.inbound.subtitles ? t('main.subtitles') : null,
+      settings.inbound.speak ? t('main.voice') : null
     ]
       .filter(Boolean)
       .join(' + ')
     modeParts.push(
-      `${languageName(settings.inbound.sourceLanguage)} → ${languageName(settings.inbound.targetLanguage)} (${extras || 'off'})`
+      `${languageName(settings.inbound.sourceLanguage)} → ${languageName(settings.inbound.targetLanguage)} (${extras || t('main.off')})`
     )
   }
 
@@ -57,45 +60,49 @@ export function MainScreen(props: MainScreenProps): React.JSX.Element {
           onClick={props.onToggle}
           disabled={props.busy}
         >
-          {props.busy ? '...' : props.running ? 'Stop' : 'Start'}
+          {props.busy ? '...' : props.running ? t('main.stop') : t('main.start')}
         </button>
         <div style={{ width: '100%' }}>
-          <LevelMeter level={Math.min(1, props.inputLevel * 8)} label="Microphone input" />
-          <LevelMeter level={props.outputActive ? 0.85 : 0} label="Translated output" />
+          <LevelMeter level={Math.min(1, props.inputLevel * 8)} label={t('main.micInput')} />
+          <LevelMeter level={props.outputActive ? 0.85 : 0} label={t('main.translatedOutput')} />
         </div>
         <div style={{ width: '100%' }}>
           <div className="field">
-            <label>Mode</label>
-            <div>{modeParts.length > 0 ? modeParts.join('  •  ') : 'Nothing enabled'}</div>
+            <label>{t('main.mode')}</label>
+            <div>{modeParts.length > 0 ? modeParts.join('  •  ') : t('main.nothingEnabled')}</div>
           </div>
           <div className="field">
-            <label>Microphone</label>
-            <div>{deviceLabel(devices.inputs, settings.micDeviceId, 'System default')}</div>
+            <label>{t('main.microphone')}</label>
+            <div>{deviceLabel(devices.inputs, settings.micDeviceId, t('main.systemDefault'))}</div>
           </div>
           <div className="field">
-            <label>Virtual microphone output</label>
+            <label>{t('main.virtualOutput')}</label>
             <div>
               {settings.virtualOutputDeviceId
-                ? deviceLabel(devices.outputs, settings.virtualOutputDeviceId, 'Unknown device')
-                : 'Not selected'}
+                ? deviceLabel(
+                    devices.outputs,
+                    settings.virtualOutputDeviceId,
+                    t('main.unknownDevice')
+                  )
+                : t('main.notSelected')}
             </div>
           </div>
           <div className="field">
-            <label>Your speakers / headphones</label>
-            <div>{deviceLabel(devices.outputs, settings.monitorDeviceId, 'System default')}</div>
+            <label>{t('main.monitor')}</label>
+            <div>
+              {deviceLabel(devices.outputs, settings.monitorDeviceId, t('main.systemDefault'))}
+            </div>
           </div>
           {settings.captureMode === 'push-to-talk' && (
             <div className="field">
-              <label>Push-to-talk</label>
-              <div>
-                Hold <code>{settings.pushToTalkKey}</code> while speaking
-              </div>
+              <label>{t('main.ptt')}</label>
+              <div>{t('main.pttHold', { key: settings.pushToTalkKey })}</div>
             </div>
           )}
         </div>
         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', justifyContent: 'center' }}>
-          <button onClick={props.onTestAudio}>Test audio</button>
-          <button onClick={props.onTestTranslation}>Test translation</button>
+          <button onClick={props.onTestAudio}>{t('main.testAudio')}</button>
+          <button onClick={props.onTestTranslation}>{t('main.testTranslation')}</button>
         </div>
         {props.testResult && <div className="test-result">{props.testResult}</div>}
       </div>
@@ -105,7 +112,7 @@ export function MainScreen(props: MainScreenProps): React.JSX.Element {
           {props.error && (
             <div className="error-box">
               <span>{props.error}</span>
-              <button onClick={props.onClearError}>Dismiss</button>
+              <button onClick={props.onClearError}>{t('main.dismiss')}</button>
             </div>
           )}
           {props.warnings.map((warning) => (
@@ -115,7 +122,7 @@ export function MainScreen(props: MainScreenProps): React.JSX.Element {
           ))}
         </div>
         <div className="panel" style={{ flex: 1, minHeight: 0, overflowY: 'auto' }}>
-          <h2>Live transcript</h2>
+          <h2>{t('main.liveTranscript')}</h2>
           <TranscriptPanel entries={props.entries} />
         </div>
       </div>

@@ -1,4 +1,4 @@
-import { app, BrowserWindow, desktopCapturer, session } from 'electron'
+import { app, BrowserWindow, desktopCapturer, session, shell } from 'electron'
 import path from 'node:path'
 import { registerIpcHandlers } from './ipcHandlers'
 import { log } from './logger'
@@ -20,6 +20,17 @@ function createWindow(): void {
   })
 
   window.setMenuBarVisibility(false)
+
+  window.webContents.setWindowOpenHandler(({ url }) => {
+    if (/^https:\/\//.test(url)) shell.openExternal(url)
+    return { action: 'deny' }
+  })
+
+  window.webContents.on('will-navigate', (event, url) => {
+    const rendererUrl = process.env.ELECTRON_RENDERER_URL
+    if (rendererUrl && url.startsWith(rendererUrl)) return
+    event.preventDefault()
+  })
 
   if (process.env.ELECTRON_RENDERER_URL) {
     window.loadURL(process.env.ELECTRON_RENDERER_URL)

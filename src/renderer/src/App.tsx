@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import type { KeyStatus, PipelineStatus, Settings, TranscriptEntry } from '../../shared/types'
 import { arrayBufferToBase64, encodeWav, generateTone } from '../../core/audio'
 import { findVirtualCable, listDevices, type AudioDevice } from './audio/devices'
+import { I18nContext, makeT, normalizeUiLanguage } from './i18n'
 import { InterpreterController } from './pipeline/controller'
 import { DiagnosticsScreen } from './components/DiagnosticsScreen'
 import { MainScreen } from './components/MainScreen'
@@ -29,6 +30,9 @@ export function App(): React.JSX.Element {
   const [busy, setBusy] = useState(false)
   const [testResult, setTestResult] = useState<string | null>(null)
   const controllerRef = useRef<InterpreterController | null>(null)
+
+  const uiLanguage = normalizeUiLanguage(settings?.interfaceLanguage ?? 'en')
+  const t = makeT(uiLanguage)
 
   const refreshDevices = useCallback(async (): Promise<void> => {
     setDevices(await listDevices())
@@ -108,7 +112,7 @@ export function App(): React.JSX.Element {
 
   async function testAudio(): Promise<void> {
     if (!settings) return
-    setTestResult('Playing a test tone to your speakers and the virtual output…')
+    setTestResult(t('test.playingTone'))
     const wav = encodeWav(generateTone([523, 659, 784], 1200, 24000), 24000)
     const base64 = arrayBufferToBase64(wav)
     const controller = controllerRef.current
@@ -116,18 +120,18 @@ export function App(): React.JSX.Element {
       await controller?.playTestTone('monitor', base64, 'audio/wav')
       if (settings.virtualOutputDeviceId) {
         await controller?.playTestTone('virtual', base64, 'audio/wav')
-        setTestResult('Test tone played to your speakers and to the virtual microphone.')
+        setTestResult(t('test.toneBoth'))
       } else {
-        setTestResult('Test tone played to your speakers. Virtual output is not selected yet.')
+        setTestResult(t('test.toneMonitorOnly'))
       }
     } catch (err) {
-      setTestResult(err instanceof Error ? err.message : 'Audio test failed.')
+      setTestResult(err instanceof Error ? err.message : t('test.audioFailed'))
     }
   }
 
   async function testTranslation(): Promise<void> {
     if (!settings) return
-    setTestResult('Translating test phrase…')
+    setTestResult(t('test.translating'))
     try {
       const result = await window.interpreter.translate({
         text: settings.testPhrase,
@@ -136,53 +140,49 @@ export function App(): React.JSX.Element {
       })
       setTestResult(`"${settings.testPhrase}" → "${result}"`)
     } catch (err) {
-      setTestResult(err instanceof Error ? err.message : 'Translation test failed.')
+      setTestResult(err instanceof Error ? err.message : t('test.translationFailed'))
     }
   }
 
   if (!settings) {
-    return <div className="screen">Loading…</div>
+    return <div className="screen">{t('app.loading')}</div>
   }
 
   const warnings: string[] = []
   const cable = findVirtualCable(devices.outputs)
   if (settings.outbound.enabled && !cable) {
-    warnings.push(
-      'No virtual audio cable detected. Install VB-CABLE (see Diagnostics) so the meeting can hear your translated voice.'
-    )
+    warnings.push(t('warn.noCable'))
   }
   if (settings.outbound.enabled && cable && !settings.virtualOutputDeviceId) {
-    warnings.push(
-      `Virtual cable "${cable.label}" is installed but not selected as the translation output. Pick it in Settings.`
-    )
+    warnings.push(t('warn.cableNotSelected', { label: cable.label }))
   }
   const needsOpenAi =
     settings.sttProvider === 'openai' ||
     settings.translationProvider === 'openai' ||
     settings.ttsProvider === 'openai'
   if (needsOpenAi && !keyStatus.openai) {
-    warnings.push('OpenAI API key is not set. Add it in Settings before starting.')
+    warnings.push(t('warn.noOpenAiKey'))
   }
   if (settings.translationProvider === 'anthropic' && !keyStatus.anthropic) {
-    warnings.push('Anthropic API key is not set. Add it in Settings before starting.')
+    warnings.push(t('warn.noAnthropicKey'))
   }
   if (settings.translationProvider === 'mock') {
-    warnings.push('Mock provider is active — translations are not real.')
+    warnings.push(t('warn.mockActive'))
   }
 
   return (
-    <>
+    <I18nContext.Provider value={uiLanguage}>
       <header className="app-header">
         <h1>AI Interpreter</h1>
         <nav className="nav">
           <button onClick={() => setScreen('main')} disabled={screen === 'main'}>
-            Home
+            {t('nav.home')}
           </button>
           <button onClick={() => setScreen('settings')} disabled={screen === 'settings'}>
-            Settings
+            {t('nav.settings')}
           </button>
           <button onClick={() => setScreen('diagnostics')} disabled={screen === 'diagnostics'}>
-            Diagnostics
+            {t('nav.diagnostics')}
           </button>
         </nav>
       </header>
@@ -232,6 +232,6 @@ export function App(): React.JSX.Element {
         )}
         {screen === 'diagnostics' && <DiagnosticsScreen settings={settings} />}
       </main>
-    </>
+    </I18nContext.Provider>
   )
 }

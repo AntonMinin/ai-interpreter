@@ -1,99 +1,124 @@
 # AI Interpreter
 
-Free and open-source real-time AI interpreter for online meetings (Zoom, Google Meet, Microsoft Teams and any other app that lets you pick a microphone).
+Free, source-available real-time AI interpreter for online meetings.
 
-You speak your language — the meeting hears your voice translated into theirs. They answer in their language — you get live subtitles (and optionally a voice) in yours.
+**Status: Early alpha. Windows MVP is available for testing. Not ready for daily production use yet.**
 
-**Install → open → press Start → it works.** That is the guiding principle of this project.
+You speak your language — the meeting hears your voice translated into theirs. They answer in their language — you get live subtitles (and optionally a voice) in yours. Works with Zoom, Google Meet, Microsoft Teams and any other app that lets you pick a microphone.
 
-> Status: **v0.1 (Windows MVP)**. The core pipeline works; see [What works / what doesn't](#what-works--what-doesnt) for honest limits.
+## Why
 
-## The problem
+Many AI interpreter tools are closed, expensive, or tied to a single meeting platform.
+AI Interpreter is a free, source-available alternative focused on one simple goal:
 
-Online meetings across a language barrier are painful. Human interpreters are expensive, built-in meeting captions don't speak for you, and existing tooling requires wiring virtual audio cables by hand. AI Interpreter packages speech recognition → translation → speech synthesis into a desktop app that a non-technical person can use.
-
-## How it works
+> **Install it, start it, and speak across languages in online meetings.**
 
 ```
 Your voice (mic) ──► speech-to-text ──► translation ──► text-to-speech ──► virtual microphone ──► meeting
-Meeting audio ─────► speech-to-text ──► translation ──► subtitles on your screen (+ optional voice in your headphones)
+Meeting audio ─────► speech-to-text ──► translation ──► subtitles on your screen (+ optional voice for you)
 ```
 
-The first language pair shipped is **Russian ↔ English**, but nothing is hardcoded — source and target languages are configurable, and 16 languages are already selectable in the UI.
+The default pair is **Russian ↔ English**, but languages are configuration, not code — any source/target pair from the built-in list (16 languages) can be selected, and adding more is a one-line change. The app interface itself is available in **English and Русский** (switchable in Settings, independent of the translation languages).
 
-## What works / what doesn't
+## What works today (alpha)
 
-**Works today (v0.1):**
-
-- Windows desktop app (Electron + TypeScript), runs from source and builds an NSIS installer
+- Windows desktop app: runs from source, builds an NSIS installer
 - Microphone capture with voice activity detection and phrase segmentation
-- Speech → text → translation → speech pipeline (OpenAI; Anthropic Claude available for the translation step)
-- Spoken translation routed into a virtual microphone (VB-CABLE) that Zoom/Meet/Teams see as a normal mic
-- Incoming meeting audio captured via Windows loopback → live subtitles, optional spoken translation into your headphones
-- First-run onboarding wizard, audio diagnostics screen, push-to-talk, offline mock provider for trying the app without any API key
-- API keys stored encrypted with Windows DPAPI, never logged
+- Speech → text → translation → speech pipeline (OpenAI; Anthropic Claude optional for translation)
+- Spoken translation routed into a virtual microphone that meeting apps see as a normal mic
+- Incoming meeting audio (Windows loopback) → live subtitles, optional voice in your headphones
+- First-run setup wizard, diagnostics screen, push-to-talk, test buttons
+- Offline **Mock mode** — try the whole app without any API key
+- API keys stored encrypted (Windows DPAPI), never logged; interface in English / Russian
 
-**Not yet:**
+## Known limitations (please read before testing)
 
-- Streaming (word-by-word) translation — the pipeline is phrase-based, so expect roughly 2–5 seconds of delay per phrase
-- A bundled virtual audio driver — you install the free VB-CABLE once; the app detects it, guides you and verifies the result
-- macOS / Linux / mobile (architecture allows it; see [ROADMAP.md](ROADMAP.md))
-- Local/offline AI models
+- **Early alpha.** Expect rough edges; don't rely on it for important meetings yet.
+- **Virtual audio device required.** The Windows alpha needs the free [VB-CABLE](https://vb-audio.com/Cable/) driver (or a compatible virtual audio device) installed once. This is a normal driver installer + one reboot; the app detects it, walks you through it and verifies the result. A built-in branded device is planned for v1.0.
+- **Latency.** Translation is phrase-based: the meeting hears you ~2–5 seconds after you finish a phrase. Streaming mode is the main v0.2 goal.
+- **Cloud only.** Speech and text are processed by the AI provider you configure (see [Privacy](#privacy--security)). No local/offline models yet.
+- **Windows only.** macOS/Linux are on the [roadmap](ROADMAP.md).
+- The installer is unsigned for now — Windows SmartScreen will warn you.
 
-## Install (users)
+## Download
 
-1. Download the latest installer from [Releases](../../releases) and run it.
-2. Install the free [VB-CABLE](https://vb-audio.com/Cable/) virtual audio driver (run its installer as administrator, reboot once). The app's onboarding explains this and verifies it.
-3. Launch **AI Interpreter** and follow the setup wizard: pick your mic, paste an API key (or try the Mock provider first), test translation, test the virtual microphone.
-4. In your meeting app choose **`CABLE Output (VB-Audio Virtual Cable)`** as the microphone.
+Grab the latest `AI Interpreter Setup <version>.exe` from the [Releases page](../../releases). Current release: **v0.1.0-alpha** ([release notes](docs/release-notes-v0.1.0-alpha.md)).
+
+## Quick start (users)
+
+1. Run the installer.
+2. Install [VB-CABLE](https://vb-audio.com/Cable/) (run as administrator, reboot once). The app's setup wizard explains and verifies this.
+3. Launch **AI Interpreter** — the wizard walks you through: interface language → microphone → voice check → API key (or Mock mode) → translation test → voice test → virtual microphone → meeting app setup.
+4. In your meeting app, select **`CABLE Output (VB-Audio Virtual Cable)`** as the microphone.
 5. Press **Start** and speak.
 
-You will need an [OpenAI API key](https://platform.openai.com/api-keys) (used for speech recognition, translation and voice) and optionally an [Anthropic API key](https://console.anthropic.com/) if you prefer Claude for translation. Typical cost is a few cents per meeting-minute of speech.
+You'll need an [OpenAI API key](https://platform.openai.com/api-keys) (speech recognition + translation + voice; typically a few cents per meeting-minute of speech), and optionally an [Anthropic key](https://console.anthropic.com/) if you prefer Claude for translation. No key? Pick **Mock mode** to explore the app offline.
 
-## Use with Zoom / Google Meet / Teams
+Full instructions: [docs/user-guide.md](docs/user-guide.md).
 
-| App | Where | What to select |
-|---|---|---|
-| Zoom | Settings → Audio → Microphone | `CABLE Output (VB-Audio Virtual Cable)` |
-| Google Meet | In-call gear icon → Audio → Microphone | `CABLE Output (VB-Audio Virtual Cable)` |
-| Microsoft Teams | Settings → Devices → Microphone | `CABLE Output (VB-Audio Virtual Cable)` |
+## Use with Zoom
 
-Keep your **speaker** set to your normal headphones. If the meeting app has its own noise suppression, set it to "low" or off for the CABLE microphone — aggressive suppression can eat synthesized speech. Details and troubleshooting: [docs/user-guide.md](docs/user-guide.md).
+Zoom → Settings → **Audio** → Microphone: `CABLE Output (VB-Audio Virtual Cable)`. Keep the speaker on your headphones. Recommended: disable "Automatically adjust microphone volume" and set background-noise suppression to Low — aggressive suppression can eat synthesized speech.
 
-## Run locally (developers)
+## Use with Google Meet
+
+In a call → gear icon → **Audio** → Microphone: `CABLE Output (VB-Audio Virtual Cable)`. Speaker: your headphones.
+
+## Use with Microsoft Teams
+
+Teams → Settings → **Devices** → Microphone: `CABLE Output (VB-Audio Virtual Cable)`. Turn off Teams noise suppression for this device if speech sounds clipped.
+
+Problems? See [docs/troubleshooting.md](docs/troubleshooting.md) — it covers "the meeting can't hear me" and friends.
+
+## Privacy & security
+
+- Short audio segments of speech and the recognized/translated text are sent **only** to the AI provider you selected, over HTTPS, and **only while the pipeline is running**. In Mock mode nothing leaves your computer.
+- No telemetry, no analytics, nothing sent to this project's authors.
+- API keys are stored locally, encrypted with Windows DPAPI, used only in the main process and redacted from logs.
+- Transcripts live in memory only and disappear when you close the app.
+
+Details: [docs/privacy.md](docs/privacy.md). Vulnerability reports: [SECURITY.md](SECURITY.md).
+
+## Development start
 
 ```bash
 git clone https://github.com/<you>/ai-interpreter.git
 cd ai-interpreter
 npm install
-npm run dev        # dev mode with hot reload
+npm run dev        # Electron with hot reload
 ```
 
-Other commands:
+Checks:
 
 ```bash
-npm run typecheck  # TypeScript check
-npm test           # unit tests (pipeline state machine, segmenter, audio codecs)
-npm run build      # production bundles into out/
-npm run dist       # Windows installer into release/
+npm run typecheck  # TypeScript
+npm test           # unit tests (state machine, VAD segmenter, audio codecs)
 ```
 
-API keys can be entered in the app (recommended) or via environment variables for development — see [.env.example](.env.example).
+The Mock provider lets you develop without API keys. More in [docs/developer-guide.md](docs/developer-guide.md).
 
-## Documentation
+## Build
 
-- [User guide](docs/user-guide.md) — setup, meeting apps, modes
-- [Troubleshooting](docs/troubleshooting.md) — "the meeting can't hear me" and friends
-- [Architecture](docs/architecture.md) — modules, data flow, how to add a provider or a language
-- [Developer guide](docs/developer-guide.md) — project layout, testing, building the installer
-- [Privacy & security](docs/privacy.md) — exactly what leaves your computer and when
-- [Manual test checklist](docs/manual-test-checklist.md)
-- [Roadmap](ROADMAP.md)
+```bash
+npm run build      # production bundles into out/
+npm run dist       # Windows NSIS installer into release/
+npm run dist:dir   # unpacked build (faster, for smoke tests)
+```
+
+## Roadmap
+
+Short version: **v0.2** — streaming STT and lower latency, better VB-CABLE detection, global push-to-talk hotkey; **v0.3** — more providers, local/offline research; **v1.0** — branded virtual microphone, signed installer, macOS. Full plan and suggested first issues: [ROADMAP.md](ROADMAP.md).
 
 ## Contributing
 
-Contributions are very welcome — this project is young and there is a lot of well-scoped work (see the roadmap). Start with [CONTRIBUTING.md](CONTRIBUTING.md). Security reports: [SECURITY.md](SECURITY.md).
+Contributions are very welcome — the project is young and there is well-scoped work at every level (docs, providers, latency, UI translations). Start with [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## License
 
-[MIT](LICENSE)
+AI Interpreter is **source-available, not open source**. You may download, install and use
+the app for free, view and study the source, build it for your own personal use, and send
+pull requests. You may **not** reuse the source in other projects, distribute modified
+versions as a separate product, or use it in commercial products without written permission.
+Contributions become part of the project under the same terms.
+
+See the full terms in [LICENSE](LICENSE) — *AI Interpreter Source Available License*, © 2026 Anton Minin Baranovskii.
