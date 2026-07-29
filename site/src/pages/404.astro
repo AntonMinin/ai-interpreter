@@ -1,0 +1,31 @@
+---
+import Base from '../layouts/Base.astro'
+---
+
+<Base locale="en" title="Page not found — AI Interpreter" description="This page does not exist.">
+  <div class="mx-auto flex max-w-xl flex-col items-center px-4 py-28 text-center sm:px-6">
+    <p class="font-mono text-5xl font-semibold text-accent">404</p>
+    <h1 class="mt-6 text-2xl font-semibold tracking-tight">This page does not exist</h1>
+    <p class="mt-3 text-muted">Эта страница не существует.</p>
+    <div class="mt-8 flex flex-wrap justify-center gap-3">
+      <a
+        href="/"
+        class="rounded-xl border border-accent bg-accent-dim px-5 py-2.5 font-semibold text-white transition-colors hover:bg-accent hover:text-ink"
+      >
+        Home
+      </a>
+      <a
+        href="/docs/install"
+        class="rounded-xl border border-edge bg-panel px-5 py-2.5 font-semibold transition-colors hover:border-muted"
+      >
+        Documentation
+      </a>
+      <a
+        href="/ru"
+        class="rounded-xl border border-edge bg-panel px-5 py-2.5 font-semibold transition-colors hover:border-muted"
+      >
+        Русская версия
+      </a>
+    </div>
+  </div>
+</Base>

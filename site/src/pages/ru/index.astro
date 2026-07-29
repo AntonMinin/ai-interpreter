@@ -1,0 +1,9 @@
+---
+import Base from '../../layouts/Base.astro'
+import Landing from '../../components/Landing.astro'
+import { ui } from '../../i18n/ui'
+---
+
+<Base locale="ru" title={ui.ru['meta.title']} description={ui.ru['meta.description']}>
+  <Landing locale="ru" />
+</Base>

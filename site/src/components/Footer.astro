@@ -1,0 +1,97 @@
+---
+import { GITHUB, ISSUES, RELEASES, type Locale } from '../i18n/ui'
+import { localePath, useTranslations } from '../i18n/utils'
+
+interface Props {
+  locale: Locale
+}
+
+const { locale } = Astro.props
+const t = useTranslations(locale)
+
+const docs = [
+  { href: localePath(locale, 'docs/install'), label: locale === 'ru' ? 'Установка' : 'Installation' },
+  {
+    href: localePath(locale, 'docs/api-keys'),
+    label: locale === 'ru' ? 'API-ключи и стоимость' : 'API keys and cost'
+  },
+  {
+    href: localePath(locale, 'docs/troubleshooting'),
+    label: locale === 'ru' ? 'Решение проблем' : 'Troubleshooting'
+  },
+  {
+    href: localePath(locale, 'docs/privacy'),
+    label: locale === 'ru' ? 'Приватность' : 'Privacy'
+  }
+]
+
+const project = [
+  { href: GITHUB, label: 'GitHub' },
+  { href: RELEASES, label: locale === 'ru' ? 'Релизы' : 'Releases' },
+  { href: ISSUES, label: locale === 'ru' ? 'Сообщить о проблеме' : 'Report a problem' },
+  { href: `${GITHUB}/blob/main/LICENSE`, label: locale === 'ru' ? 'Лицензия' : 'Licence' }
+]
+---
+
+<footer class="border-t border-edge bg-panel/40">
+  <div class="mx-auto max-w-6xl px-4 py-12 sm:px-6">
+    <div class="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
+      <div class="lg:col-span-2">
+        <div class="flex items-center gap-2.5 font-semibold">
+          <svg viewBox="0 0 32 32" class="h-6 w-6" aria-hidden="true">
+            <rect width="32" height="32" rx="7" fill="#141a21"></rect>
+            <path
+              d="M9 11v10M13 8v16M17 12v8M21 9.5v13M25 13v6"
+              stroke="#35c26e"
+              stroke-width="2.4"
+              stroke-linecap="round"></path>
+          </svg>
+          AI Interpreter
+        </div>
+        <p class="mt-3 max-w-sm text-sm text-muted">{t('footer.tagline')}</p>
+        <p class="mt-4 text-xs text-muted/80">{t('footer.notAffiliated')}</p>
+      </div>
+
+      <div>
+        <h2 class="text-xs font-semibold uppercase tracking-wider text-muted">
+          {t('footer.docsTitle')}
+        </h2>
+        <ul class="mt-3 space-y-2 text-sm">
+          {
+            docs.map((link) => (
+              <li>
+                <a href={link.href} class="text-fg/85 transition-colors hover:text-accent">
+                  {link.label}
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+
+      <div>
+        <h2 class="text-xs font-semibold uppercase tracking-wider text-muted">
+          {t('footer.project')}
+        </h2>
+        <ul class="mt-3 space-y-2 text-sm">
+          {
+            project.map((link) => (
+              <li>
+                <a
+                  href={link.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="text-fg/85 transition-colors hover:text-accent"
+                >
+                  {link.label}
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+    </div>
+
+    <p class="mt-10 border-t border-edge pt-6 text-xs text-muted">{t('footer.legal')}</p>
+  </div>
+</footer>

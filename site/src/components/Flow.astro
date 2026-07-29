@@ -1,0 +1,82 @@
+---
+import type { Locale } from '../i18n/ui'
+import { useTranslations } from '../i18n/utils'
+
+interface Props {
+  locale: Locale
+}
+
+const { locale } = Astro.props
+const t = useTranslations(locale)
+
+const outbound = [t('flow.mic'), t('flow.stt'), t('flow.mt'), t('flow.tts'), t('flow.vmic'), t('flow.meeting')]
+const inbound = [t('flow.sysaudio'), t('flow.stt'), t('flow.mt'), t('flow.subs')]
+---
+
+<section class="mx-auto max-w-6xl px-4 py-20 sm:px-6" id="how">
+  <h2 class="text-2xl font-semibold tracking-tight sm:text-3xl">{t('flow.title')}</h2>
+  <p class="mt-3 max-w-2xl text-muted">{t('flow.lead')}</p>
+
+  <div class="mt-10 space-y-6">
+    <div class="rounded-2xl border border-edge bg-panel p-6">
+      <div class="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-accent">
+        <span class="h-2 w-2 rounded-full bg-accent"></span>
+        {t('flow.outLabel')}
+      </div>
+      <ol class="mt-5 flex flex-wrap items-center gap-x-2 gap-y-3">
+        {
+          outbound.map((step, index) => (
+            <li class="flex items-center gap-2">
+              <span
+                class:list={[
+                  'rounded-lg border px-3 py-2 text-sm',
+                  index === 0 || index === outbound.length - 1
+                    ? 'border-accent/50 bg-accent-dim/15 font-medium text-fg'
+                    : 'border-edge bg-panel-2 text-fg/85'
+                ]}
+              >
+                {step}
+              </span>
+              {index < outbound.length - 1 && (
+                <span class="text-muted" aria-hidden="true">
+                  →
+                </span>
+              )}
+            </li>
+          ))
+        }
+      </ol>
+    </div>
+
+    <div class="rounded-2xl border border-edge bg-panel p-6">
+      <div class="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-info">
+        <span class="h-2 w-2 rounded-full bg-info"></span>
+        {t('flow.inLabel')}
+      </div>
+      <ol class="mt-5 flex flex-wrap items-center gap-x-2 gap-y-3">
+        {
+          inbound.map((step, index) => (
+            <li class="flex items-center gap-2">
+              <span
+                class:list={[
+                  'rounded-lg border px-3 py-2 text-sm',
+                  index === 0 || index === inbound.length - 1
+                    ? 'border-info/50 bg-info/10 font-medium text-fg'
+                    : 'border-edge bg-panel-2 text-fg/85'
+                ]}
+              >
+                {step}
+              </span>
+              {index < inbound.length - 1 && (
+                <span class="text-muted" aria-hidden="true">
+                  →
+                </span>
+              )}
+            </li>
+          ))
+        }
+      </ol>
+      <p class="mt-4 text-sm text-muted">+ {t('flow.optvoice')}</p>
+    </div>
+  </div>
+</section>
