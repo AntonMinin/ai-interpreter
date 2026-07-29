@@ -1,5 +1,5 @@
 import type { PipelineStatus, Settings, TranscriptEntry } from '../../../shared/types'
-import { languageName } from '../../../shared/languages'
+import { languageLabel } from '../../../shared/languages'
 import type { AudioDevice } from '../audio/devices'
 import { useT } from '../i18n'
 import { LevelMeter } from './LevelMeter'
@@ -38,7 +38,7 @@ export function MainScreen(props: MainScreenProps): React.JSX.Element {
   const modeParts: string[] = []
   if (settings.outbound.enabled) {
     modeParts.push(
-      `${languageName(settings.outbound.sourceLanguage)} → ${languageName(settings.outbound.targetLanguage)} (${t('main.voice')})`
+      `${languageLabel(settings.outbound.sourceLanguage)} → ${languageLabel(settings.outbound.targetLanguage)} (${t('main.voice')})`
     )
   }
   if (settings.inbound.enabled) {
@@ -49,7 +49,7 @@ export function MainScreen(props: MainScreenProps): React.JSX.Element {
       .filter(Boolean)
       .join(' + ')
     modeParts.push(
-      `${languageName(settings.inbound.sourceLanguage)} → ${languageName(settings.inbound.targetLanguage)} (${extras || t('main.off')})`
+      `${languageLabel(settings.inbound.sourceLanguage)} → ${languageLabel(settings.inbound.targetLanguage)} (${extras || t('main.off')})`
     )
   }
 
@@ -117,14 +117,14 @@ export function MainScreen(props: MainScreenProps): React.JSX.Element {
           <button onClick={props.onTestAudio}>{t('main.testAudio')}</button>
           <button onClick={props.onTestTranslation}>{t('main.testTranslation')}</button>
         </div>
-        {props.testResult && <div className="test-result">{props.testResult}</div>}
+        {props.testResult && <div className="test-result">{t(props.testResult)}</div>}
       </div>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 16, minHeight: 0 }}>
         <div>
           {props.error && (
             <div className="error-box" role="alert">
-              <span>{props.error}</span>
+              <span>{t(props.error)}</span>
               <button onClick={props.onClearError}>{t('main.dismiss')}</button>
             </div>
           )}

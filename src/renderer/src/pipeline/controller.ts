@@ -70,7 +70,7 @@ export class InterpreterController {
       previous.noiseSuppression !== settings.noiseSuppression
     if (this.running && micChanged && settings.outbound.enabled) {
       void this.startOutbound().catch((error) =>
-        this.fail('capture', error instanceof Error ? error.message : String(error))
+        this.fail('capture', 'err.captureFailed', error)
       )
     }
     const segmenterConfig = {
@@ -121,7 +121,7 @@ export class InterpreterController {
       this.running = false
       await this.shutdownCapture()
       this.dispatch({ type: 'STOP' })
-      this.fail('capture', error instanceof Error ? error.message : String(error))
+      this.fail('capture', 'err.captureFailed', error)
       throw error
     }
   }
@@ -242,7 +242,7 @@ export class InterpreterController {
         language: config.sourceLanguage
       })
     } catch (error) {
-      this.fail('stt', error instanceof Error ? error.message : 'Speech recognition failed.')
+      this.fail('stt', error instanceof Error ? error.message : 'err.sttFailed')
       return
     } finally {
       this.dispatch({ type: 'STT_END' })
@@ -258,7 +258,7 @@ export class InterpreterController {
         targetLanguage: config.targetLanguage
       })
     } catch (error) {
-      this.fail('translation', error instanceof Error ? error.message : 'Translation failed.')
+      this.fail('translation', error instanceof Error ? error.message : 'err.translateFailed')
       return
     } finally {
       this.dispatch({ type: 'TRANSLATE_END' })
@@ -277,7 +277,7 @@ export class InterpreterController {
           language: config.targetLanguage
         })
       } catch (error) {
-        this.fail('tts', error instanceof Error ? error.message : 'Speech synthesis failed.')
+        this.fail('tts', error instanceof Error ? error.message : 'err.ttsFailed')
       } finally {
         this.dispatch({ type: 'TTS_END' })
       }
@@ -303,7 +303,7 @@ export class InterpreterController {
     try {
       await player.enqueue(audio.audioBase64, audio.mimeType)
     } catch (error) {
-      this.fail('playback', error instanceof Error ? error.message : 'Audio playback failed.')
+      this.fail('playback', error instanceof Error ? error.message : 'err.playbackFailed')
     }
   }
 
@@ -312,8 +312,9 @@ export class InterpreterController {
     await player.enqueue(audioBase64, mime)
   }
 
-  private fail(stage: string, message: string): void {
-    void window.interpreter.log('error', `[${stage}] ${message}`)
+  private fail(stage: string, message: string, detail?: unknown): void {
+    const raw = detail instanceof Error ? ` ${detail.message}` : ''
+    void window.interpreter.log('error', `[${stage}] ${message}${raw}`)
     this.dispatch({ type: 'ERROR', message })
     this.consecutiveFailures++
     if (this.consecutiveFailures >= MAX_CONSECUTIVE_FAILURES && this.running) {

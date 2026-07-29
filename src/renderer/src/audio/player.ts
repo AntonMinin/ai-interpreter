@@ -94,16 +94,14 @@ export class AudioQueuePlayer {
       }
       audio.onerror = () => {
         cleanup()
-        reject(new Error('Audio playback failed.'))
+        reject(new Error('err.playbackFailed'))
       }
 
       const sinkId = this.getSinkId()
       const setSink =
         sinkId && sinkId !== 'default'
           ? audio.setSinkId(sinkId).catch(() => {
-              throw new Error(
-                'Could not route audio to the selected output device. Check device selection.'
-              )
+              throw new Error('err.sinkFailed')
             })
           : Promise.resolve()
 

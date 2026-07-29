@@ -57,7 +57,7 @@ export class MockProvider implements SttProvider, TranslationProvider, TtsProvid
   }
 
   async testKey(): Promise<KeyTestResult> {
-    return { ok: true, message: 'Mock provider needs no API key.' }
+    return { ok: true, message: 'err.mockNoKey' }
   }
 }
 

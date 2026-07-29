@@ -24,7 +24,7 @@ function LanguageSelect({
     <select value={value} onChange={(e) => onChange(e.target.value)}>
       {LANGUAGES.map((lang) => (
         <option key={lang.code} value={lang.code}>
-          {lang.name} ({lang.nativeName})
+          {lang.nativeName}
         </option>
       ))}
     </select>
@@ -260,6 +260,9 @@ export function SettingsScreen(props: SettingsScreenProps): React.JSX.Element {
           />
           <label htmlFor="noise-suppression">{t('set.noiseSuppression')}</label>
         </div>
+        <details className="advanced">
+          <summary>{t('set.advanced')}</summary>
+          <p className="hint">{t('set.advancedHint')}</p>
         <div className="field-row">
           <div className="field">
             <label>{t('set.sensitivity', { value: settings.vadThreshold.toFixed(3) })}</label>
@@ -308,10 +311,13 @@ export function SettingsScreen(props: SettingsScreenProps): React.JSX.Element {
             />
           </div>
         </div>
+        </details>
       </div>
 
       <div className="panel">
-        <h2>{t('set.providers')}</h2>
+        <h2>{t('set.apiKeys')}</h2>
+        <details className="advanced">
+          <summary>{t('set.providers')}</summary>
         <div className="field">
           <label>{t('set.stt')}</label>
           <select
@@ -369,8 +375,8 @@ export function SettingsScreen(props: SettingsScreenProps): React.JSX.Element {
             )}
           </select>
         </div>
+        </details>
 
-        <div className="section-title">{t('set.apiKeys')}</div>
         <div className="field">
           <label>
             {t('set.openaiKey')} {keyStatus.openai ? t('set.keySaved') : t('set.keyNotSet')}
@@ -412,7 +418,7 @@ export function SettingsScreen(props: SettingsScreenProps): React.JSX.Element {
             </button>
           </div>
         </div>
-        {keyMessage && <div className="test-result">{keyMessage}</div>}
+        {keyMessage && <div className="test-result">{t(keyMessage)}</div>}
         <p className="hint">{t('set.keysHint')}</p>
 
         <div className="section-title">{t('set.testPhrase')}</div>
@@ -424,7 +430,8 @@ export function SettingsScreen(props: SettingsScreenProps): React.JSX.Element {
           />
         </div>
 
-        <div className="section-title">{t('set.debugging')}</div>
+        <details className="advanced">
+          <summary>{t('set.debugging')}</summary>
         <div className="checkbox-row">
           <input
             type="checkbox"
@@ -450,6 +457,7 @@ export function SettingsScreen(props: SettingsScreenProps): React.JSX.Element {
         >
           {t('set.clearLogs')}
         </button>
+        </details>
       </div>
     </div>
   )

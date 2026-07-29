@@ -225,6 +225,28 @@ export function OnboardingWizard(props: OnboardingProps): React.JSX.Element {
               <span className="hint">{t('ob.openaiAlwaysNeeded')}</span>
             </div>
           )}
+          {settings.translationProvider !== 'mock' && (
+            <div>
+              <p className="hint">{t('ob.keyCostNote')}</p>
+              <button
+                onClick={() =>
+                  void window.interpreter.openExternal('https://platform.openai.com/api-keys')
+                }
+              >
+                {t('ob.openKeyPage')}
+              </button>
+              {settings.translationProvider === 'anthropic' && (
+                <button
+                  style={{ marginLeft: 8 }}
+                  onClick={() =>
+                    void window.interpreter.openExternal('https://console.anthropic.com/settings/keys')
+                  }
+                >
+                  {t('ob.openAnthropicKeyPage')}
+                </button>
+              )}
+            </div>
+          )}
           {settings.translationProvider === 'anthropic' && (
             <div className="field">
               <label>
@@ -341,7 +363,7 @@ export function OnboardingWizard(props: OnboardingProps): React.JSX.Element {
         </div>
       )}
 
-      {message && <div className="test-result">{message}</div>}
+      {message && <div className="test-result">{t(message)}</div>}
 
       <div className="actions">
         <button onClick={back} disabled={step === 1}>

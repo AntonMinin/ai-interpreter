@@ -30,15 +30,24 @@ export interface InterpreterApi {
   onToggleMute(handler: () => void): () => void
 }
 
+async function invoke<T>(channel: string, ...args: unknown[]): Promise<T> {
+  try {
+    return (await ipcRenderer.invoke(channel, ...args)) as T
+  } catch (error) {
+    const raw = error instanceof Error ? error.message : String(error)
+    throw new Error(raw.replace(/^Error invoking remote method '[^']*': (?:Error: )?/, ''))
+  }
+}
+
 const api: InterpreterApi = {
   getSettings: () => ipcRenderer.invoke(IPC.getSettings),
   updateSettings: (patch) => ipcRenderer.invoke(IPC.updateSettings, patch),
   getKeyStatus: () => ipcRenderer.invoke(IPC.getKeyStatus),
   setApiKey: (provider, key) => ipcRenderer.invoke(IPC.setApiKey, provider, key),
   testApiKey: (provider) => ipcRenderer.invoke(IPC.testApiKey, provider),
-  transcribe: (request) => ipcRenderer.invoke(IPC.transcribe, request),
-  translate: (request) => ipcRenderer.invoke(IPC.translate, request),
-  synthesize: (request) => ipcRenderer.invoke(IPC.synthesize, request),
+  transcribe: (request) => invoke(IPC.transcribe, request),
+  translate: (request) => invoke(IPC.translate, request),
+  synthesize: (request) => invoke(IPC.synthesize, request),
   mainDiagnostics: () => ipcRenderer.invoke(IPC.mainDiagnostics),
   log: (level, message) => ipcRenderer.invoke(IPC.log, level, message),
   getLogPath: () => ipcRenderer.invoke(IPC.getLogPath),

@@ -26,3 +26,7 @@ export const LANGUAGES: Language[] = [
 export function languageName(code: string): string {
   return LANGUAGES.find((l) => l.code === code)?.name ?? code
 }
+
+export function languageLabel(code: string): string {
+  return LANGUAGES.find((l) => l.code === code)?.nativeName ?? code
+}

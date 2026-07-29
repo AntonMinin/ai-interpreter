@@ -50,7 +50,7 @@ export function registerIpcHandlers(): void {
       const wav = Buffer.from(request.wavBase64, 'base64')
       return await sttProvider(settings.sttProvider).transcribe(wav, request.language)
     } catch (error) {
-      wrapError(error, 'Speech recognition failed')
+      wrapError(error, 'err.sttFailed')
     }
   })
 
@@ -63,7 +63,7 @@ export function registerIpcHandlers(): void {
         request.targetLanguage
       )
     } catch (error) {
-      wrapError(error, 'Translation failed')
+      wrapError(error, 'err.translateFailed')
     }
   })
 
@@ -74,7 +74,7 @@ export function registerIpcHandlers(): void {
       try {
         return await ttsProvider(settings.ttsProvider).synthesize(request.text, request.language)
       } catch (error) {
-        wrapError(error, 'Speech synthesis failed')
+        wrapError(error, 'err.ttsFailed')
       }
     }
   )
@@ -135,10 +135,10 @@ async function runMainDiagnostics(): Promise<MainDiagnostics> {
   if (usesMock) {
     items.push({
       id: 'provider',
-      label: 'AI provider',
       status: 'warning',
-      message: 'Mock provider is active. No real translation will happen.',
-      action: 'Select a real provider in Settings when you are ready.'
+      labelKey: 'diag.provider',
+      messageKey: 'diag.providerMock',
+      actionKey: 'diag.providerMockAction'
     })
     return { items }
   }
@@ -154,57 +154,43 @@ async function runMainDiagnostics(): Promise<MainDiagnostics> {
       method: 'HEAD',
       signal: AbortSignal.timeout(8000)
     })
-    items.push({ id: 'internet', label: 'Internet connection', status: 'ok', message: 'Online.' })
+    items.push({
+      id: 'internet',
+      status: 'ok',
+      labelKey: 'diag.internet',
+      messageKey: 'diag.internetOk'
+    })
   } catch {
     items.push({
       id: 'internet',
-      label: 'Internet connection',
       status: 'error',
-      message: 'No internet connection detected.',
-      action: 'Check your network. Cloud translation needs internet access.'
+      labelKey: 'diag.internet',
+      messageKey: 'diag.internetFail',
+      actionKey: 'diag.internetAction'
     })
   }
 
-  if (needsOpenAi) {
-    if (!getSecret('openai')) {
+  for (const provider of ['openai', 'anthropic'] as const) {
+    if (provider === 'openai' ? !needsOpenAi : !needsAnthropic) continue
+    const labelKey = `diag.${provider}Key`
+    if (!getSecret(provider)) {
       items.push({
-        id: 'openai-key',
-        label: 'OpenAI API key',
+        id: `${provider}-key`,
         status: 'error',
-        message: 'OpenAI API key is not set.',
-        action: 'Open Settings and paste your OpenAI API key.'
+        labelKey,
+        messageKey: `diag.${provider}KeyMissing`,
+        actionKey: `diag.${provider}KeyAction`
       })
-    } else {
-      const result = await keyValidator('openai').testKey()
-      items.push({
-        id: 'openai-key',
-        label: 'OpenAI API key',
-        status: result.ok ? 'ok' : 'error',
-        message: result.message,
-        action: result.ok ? undefined : 'Check the key in Settings.'
-      })
+      continue
     }
-  }
-
-  if (needsAnthropic) {
-    if (!getSecret('anthropic')) {
-      items.push({
-        id: 'anthropic-key',
-        label: 'Anthropic API key',
-        status: 'error',
-        message: 'Anthropic API key is not set.',
-        action: 'Open Settings and paste your Anthropic API key.'
-      })
-    } else {
-      const result = await keyValidator('anthropic').testKey()
-      items.push({
-        id: 'anthropic-key',
-        label: 'Anthropic API key',
-        status: result.ok ? 'ok' : 'error',
-        message: result.message,
-        action: result.ok ? undefined : 'Check the key in Settings.'
-      })
-    }
+    const result = await keyValidator(provider).testKey()
+    items.push({
+      id: `${provider}-key`,
+      status: result.ok ? 'ok' : 'error',
+      labelKey,
+      messageKey: result.message,
+      actionKey: result.ok ? undefined : 'diag.keyCheckAction'
+    })
   }
 
   return { items }

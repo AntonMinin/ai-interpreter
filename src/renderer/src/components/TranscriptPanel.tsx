@@ -1,6 +1,6 @@
 import { memo } from 'react'
 import type { TranscriptEntry } from '../../../shared/types'
-import { languageName } from '../../../shared/languages'
+import { languageLabel } from '../../../shared/languages'
 import { useT } from '../i18n'
 
 export const TranscriptPanel = memo(function TranscriptPanel({
@@ -18,7 +18,7 @@ export const TranscriptPanel = memo(function TranscriptPanel({
         <div key={entry.id} className={`transcript-entry ${entry.direction}`}>
           <div className="meta">
             {entry.direction === 'outbound' ? t('transcript.you') : t('transcript.meeting')} ·{' '}
-            {languageName(entry.sourceLanguage)} → {languageName(entry.targetLanguage)} ·{' '}
+            {languageLabel(entry.sourceLanguage)} → {languageLabel(entry.targetLanguage)} ·{' '}
             {new Date(entry.timestamp).toLocaleTimeString()}
           </div>
           <div className="source">{entry.sourceText}</div>

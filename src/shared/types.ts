@@ -147,10 +147,11 @@ export type DiagnosticStatus = 'ok' | 'warning' | 'error'
 
 export interface DiagnosticItem {
   id: string
-  label: string
   status: DiagnosticStatus
-  message: string
-  action?: string
+  labelKey: string
+  messageKey: string
+  actionKey?: string
+  params?: Record<string, string | number>
 }
 
 export interface MainDiagnostics {

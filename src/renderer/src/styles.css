@@ -350,6 +350,25 @@ code {
   max-width: 1000px;
 }
 
+details.advanced {
+  margin-top: 20px;
+  border-top: 1px solid var(--border);
+  padding-top: 12px;
+}
+
+details.advanced > summary {
+  cursor: pointer;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--muted);
+  margin-bottom: 12px;
+}
+
+details.advanced > summary:hover {
+  color: var(--text);
+}
+
 .test-result {
   margin-top: 8px;
   font-size: 0.88rem;

@@ -28,7 +28,7 @@ export class ProviderError extends Error {
 export function toUserMessage(error: unknown, fallback: string): string {
   if (error instanceof ProviderError) return error.userMessage
   if (error instanceof Error && /fetch failed|ENOTFOUND|ECONNREFUSED|ETIMEDOUT/i.test(error.message)) {
-    return 'No internet connection, or the AI provider is unreachable.'
+    return 'err.offline'
   }
   return fallback
 }

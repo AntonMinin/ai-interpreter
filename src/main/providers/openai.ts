@@ -13,21 +13,21 @@ import {
 const BASE_URL = 'https://api.openai.com/v1'
 const REQUEST_TIMEOUT_MS = 30000
 
-async function post(url: string, init: RequestInit, what: string): Promise<Response> {
+async function post(url: string, init: RequestInit): Promise<Response> {
   try {
     return await fetch(url, { ...init, signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS) })
   } catch (error) {
     if (error instanceof Error && (error.name === 'TimeoutError' || error.name === 'AbortError')) {
-      throw new ProviderError(`OpenAI ${what} timed out. Check your connection and try again.`)
+      throw new ProviderError('err.openaiTimeout')
     }
-    throw new ProviderError(`Could not reach OpenAI for ${what}. Check your internet connection.`)
+    throw new ProviderError('err.openaiUnreachable')
   }
 }
 
 function requireKey(): string {
   const key = getSecret('openai')
   if (!key) {
-    throw new ProviderError('OpenAI API key is not set. Add it in Settings.')
+    throw new ProviderError('err.openaiKeyMissing')
   }
   return key
 }
@@ -37,12 +37,12 @@ async function raiseForStatus(response: Response, what: string): Promise<void> {
   const body = await response.text().catch(() => '')
   log('error', `OpenAI ${what} failed: HTTP ${response.status} ${body.slice(0, 300)}`)
   if (response.status === 401) {
-    throw new ProviderError('OpenAI API key is invalid. Check it in Settings.')
+    throw new ProviderError('err.openaiKeyInvalid')
   }
   if (response.status === 429) {
-    throw new ProviderError('OpenAI rate limit reached. Wait a moment and try again.')
+    throw new ProviderError('err.openaiRateLimit')
   }
-  throw new ProviderError(`OpenAI ${what} failed (HTTP ${response.status}).`)
+  throw new ProviderError('err.openaiFailed')
 }
 
 export class OpenAiProvider implements SttProvider, TranslationProvider, TtsProvider, KeyValidator {
@@ -56,8 +56,7 @@ export class OpenAiProvider implements SttProvider, TranslationProvider, TtsProv
     form.append('language', language)
     const response = await post(
       `${BASE_URL}/audio/transcriptions`,
-      { method: 'POST', headers: { Authorization: `Bearer ${key}` }, body: form },
-      'transcription'
+      { method: 'POST', headers: { Authorization: `Bearer ${key}` }, body: form }
     )
     await raiseForStatus(response, 'transcription')
     const data = (await response.json()) as { text?: string }
@@ -88,8 +87,7 @@ export class OpenAiProvider implements SttProvider, TranslationProvider, TtsProv
           ],
           temperature: 0.2
         })
-      },
-      'translation'
+      }
     )
     await raiseForStatus(response, 'translation')
     const data = (await response.json()) as {
@@ -115,8 +113,7 @@ export class OpenAiProvider implements SttProvider, TranslationProvider, TtsProv
           input: text,
           response_format: 'mp3'
         })
-      },
-      'speech synthesis'
+      }
     )
     await raiseForStatus(response, 'speech synthesis')
     const audio = Buffer.from(await response.arrayBuffer())
@@ -125,17 +122,17 @@ export class OpenAiProvider implements SttProvider, TranslationProvider, TtsProv
 
   async testKey(): Promise<KeyTestResult> {
     const key = getSecret('openai')
-    if (!key) return { ok: false, message: 'No OpenAI API key set.' }
+    if (!key) return { ok: false, message: 'err.openaiKeyNotSet' }
     try {
       const response = await fetch(`${BASE_URL}/models`, {
         headers: { Authorization: `Bearer ${key}` },
         signal: AbortSignal.timeout(10000)
       })
-      if (response.status === 401) return { ok: false, message: 'OpenAI API key is invalid.' }
-      if (!response.ok) return { ok: false, message: `OpenAI returned HTTP ${response.status}.` }
-      return { ok: true, message: 'OpenAI API key is valid.' }
+      if (response.status === 401) return { ok: false, message: 'err.openaiKeyInvalidShort' }
+      if (!response.ok) return { ok: false, message: 'err.openaiFailed' }
+      return { ok: true, message: 'err.openaiKeyValid' }
     } catch {
-      return { ok: false, message: 'Could not reach OpenAI. Check your internet connection.' }
+      return { ok: false, message: 'err.openaiUnreachable' }
     }
   }
 }

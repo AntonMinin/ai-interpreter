@@ -9,24 +9,24 @@ export function DiagnosticsScreen({ settings }: { settings: Settings }): React.J
   const t = useT()
   const [items, setItems] = useState<DiagnosticItem[] | null>(null)
   const [running, setRunning] = useState(false)
-  const latest = useRef({ settings, t })
-  latest.current = { settings, t }
+  const latest = useRef(settings)
+  latest.current = settings
 
   const run = useCallback(async (): Promise<void> => {
-    const { settings, t } = latest.current
+    const settings = latest.current
     setRunning(true)
     const results: DiagnosticItem[] = []
 
     const micAllowed = await requestMicPermission()
     results.push(
       micAllowed
-        ? { id: 'mic-perm', label: t('diag.micPerm'), status: 'ok', message: t('diag.micPermOk') }
+        ? { id: 'mic-perm', labelKey: 'diag.micPerm', status: 'ok', messageKey: 'diag.micPermOk' }
         : {
             id: 'mic-perm',
-            label: t('diag.micPerm'),
+            labelKey: 'diag.micPerm',
             status: 'error',
-            message: t('diag.micPermFail'),
-            action: t('diag.micPermAction')
+            messageKey: 'diag.micPermFail',
+            actionKey: 'diag.micPermAction'
           }
     )
 
@@ -35,16 +35,16 @@ export function DiagnosticsScreen({ settings }: { settings: Settings }): React.J
       devices.inputs.length > 0
         ? {
             id: 'mic-present',
-            label: t('diag.micFound'),
+            labelKey: 'diag.micFound',
             status: 'ok',
-            message: t('diag.micFoundOk', { n: devices.inputs.length })
+            messageKey: 'diag.micFoundOk', params: { n: devices.inputs.length }
           }
         : {
             id: 'mic-present',
-            label: t('diag.micFound'),
+            labelKey: 'diag.micFound',
             status: 'error',
-            message: t('diag.micFoundFail'),
-            action: t('diag.micFoundAction')
+            messageKey: 'diag.micFoundFail',
+            actionKey: 'diag.micFoundAction'
           }
     )
 
@@ -52,32 +52,32 @@ export function DiagnosticsScreen({ settings }: { settings: Settings }): React.J
     if (!cable) {
       results.push({
         id: 'cable',
-        label: t('diag.cable'),
+        labelKey: 'diag.cable',
         status: 'error',
-        message: t('diag.cableFail'),
-        action: t('diag.cableAction')
+        messageKey: 'diag.cableFail',
+        actionKey: 'diag.cableAction'
       })
     } else {
       results.push({
         id: 'cable',
-        label: t('diag.cable'),
+        labelKey: 'diag.cable',
         status: 'ok',
-        message: t('diag.cableOk', { label: cable.label })
+        messageKey: 'diag.cableOk', params: { label: cable.label }
       })
       if (!settings.virtualOutputDeviceId) {
         results.push({
           id: 'cable-selected',
-          label: t('diag.cableSelected'),
+          labelKey: 'diag.cableSelected',
           status: 'warning',
-          message: t('diag.cableSelectedWarn'),
-          action: t('diag.cableSelectedAction', { label: cable.label })
+          messageKey: 'diag.cableSelectedWarn',
+          actionKey: 'diag.cableSelectedAction', params: { label: cable.label }
         })
       } else {
         results.push({
           id: 'cable-selected',
-          label: t('diag.cableSelected'),
+          labelKey: 'diag.cableSelected',
           status: 'ok',
-          message: t('diag.cableSelectedOk')
+          messageKey: 'diag.cableSelectedOk'
         })
       }
     }
@@ -85,17 +85,17 @@ export function DiagnosticsScreen({ settings }: { settings: Settings }): React.J
     if (settings.outbound.enabled || settings.inbound.enabled) {
       results.push({
         id: 'directions',
-        label: t('diag.directions'),
+        labelKey: 'diag.directions',
         status: 'ok',
-        message: t('diag.directionsOk')
+        messageKey: 'diag.directionsOk'
       })
     } else {
       results.push({
         id: 'directions',
-        label: t('diag.directions'),
+        labelKey: 'diag.directions',
         status: 'warning',
-        message: t('diag.directionsWarn'),
-        action: t('diag.directionsAction')
+        messageKey: 'diag.directionsWarn',
+        actionKey: 'diag.directionsAction'
       })
     }
 
@@ -105,9 +105,9 @@ export function DiagnosticsScreen({ settings }: { settings: Settings }): React.J
     } catch {
       results.push({
         id: 'main-diag',
-        label: t('diag.providerChecks'),
+        labelKey: 'diag.providerChecks',
         status: 'error',
-        message: t('diag.mainFail')
+        messageKey: 'diag.mainFail'
       })
     }
 
@@ -130,9 +130,11 @@ export function DiagnosticsScreen({ settings }: { settings: Settings }): React.J
             <div key={item.id} className="diag-item">
               <div className="diag-icon">{ICONS[item.status]}</div>
               <div className="diag-body">
-                <div className="label">{item.label}</div>
-                <div className="message">{item.message}</div>
-                {item.action && <div className="action">{item.action}</div>}
+                <div className="label">{t(item.labelKey)}</div>
+                <div className="message">{t(item.messageKey, item.params)}</div>
+                {item.actionKey && (
+                  <div className="action">{t(item.actionKey, item.params)}</div>
+                )}
               </div>
             </div>
           ))}
