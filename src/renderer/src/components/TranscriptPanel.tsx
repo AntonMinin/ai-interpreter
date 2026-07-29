@@ -1,8 +1,13 @@
+import { memo } from 'react'
 import type { TranscriptEntry } from '../../../shared/types'
 import { languageName } from '../../../shared/languages'
 import { useT } from '../i18n'
 
-export function TranscriptPanel({ entries }: { entries: TranscriptEntry[] }): React.JSX.Element {
+export const TranscriptPanel = memo(function TranscriptPanel({
+  entries
+}: {
+  entries: TranscriptEntry[]
+}): React.JSX.Element {
   const t = useT()
   if (entries.length === 0) {
     return <p className="hint">{t('transcript.empty')}</p>
@@ -22,4 +27,4 @@ export function TranscriptPanel({ entries }: { entries: TranscriptEntry[] }): Re
       ))}
     </div>
   )
-}
+})

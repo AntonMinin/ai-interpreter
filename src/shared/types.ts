@@ -18,6 +18,7 @@ export interface Settings {
   virtualOutputDeviceId: string
   captureMode: CaptureMode
   pushToTalkKey: string
+  muteHotkey: string
   vadThreshold: number
   minPhraseMs: number
   maxSilenceMs: number
@@ -51,21 +52,43 @@ export const DEFAULT_SETTINGS: Settings = {
   virtualOutputDeviceId: '',
   captureMode: 'auto',
   pushToTalkKey: 'Space',
+  muteHotkey: 'Control+Shift+Space',
   vadThreshold: 0.012,
   minPhraseMs: 400,
-  maxSilenceMs: 700,
+  maxSilenceMs: 600,
   maxPhraseMs: 12000,
   noiseSuppression: true,
   sttProvider: 'openai',
   translationProvider: 'openai',
   ttsProvider: 'openai',
-  anthropicModel: 'claude-opus-4-8',
+  anthropicModel: 'claude-opus-5',
   openaiSttModel: 'gpt-4o-mini-transcribe',
   openaiTranslationModel: 'gpt-4o-mini',
   openaiTtsModel: 'gpt-4o-mini-tts',
   openaiTtsVoice: 'alloy',
   testPhrase: 'Привет! Это проверка перевода.',
   debugMode: false
+}
+
+const LIMITS = {
+  vadThreshold: [0.001, 0.2],
+  minPhraseMs: [100, 5000],
+  maxSilenceMs: [150, 3000],
+  maxPhraseMs: [2000, 30000]
+} as const
+
+export function clampSettings(settings: Settings): Settings {
+  for (const key of Object.keys(LIMITS) as (keyof typeof LIMITS)[]) {
+    const [min, max] = LIMITS[key]
+    const value = Number(settings[key])
+    settings[key] = Number.isFinite(value)
+      ? Math.min(max, Math.max(min, value))
+      : DEFAULT_SETTINGS[key]
+  }
+  if (settings.maxPhraseMs <= settings.minPhraseMs) {
+    settings.maxPhraseMs = Math.min(LIMITS.maxPhraseMs[1], settings.minPhraseMs * 4)
+  }
+  return settings
 }
 
 export type PipelineStatus =

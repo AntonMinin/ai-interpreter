@@ -11,5 +11,7 @@ export const IPC = {
   log: 'log:write',
   getLogPath: 'log:path',
   clearLogs: 'log:clear',
-  openExternal: 'shell:openExternal'
+  openExternal: 'shell:openExternal',
+  registerHotkey: 'hotkey:register',
+  hotkeyToggleMute: 'hotkey:toggleMute'
 } as const

@@ -29,6 +29,7 @@ export class PhraseSegmenter {
   private bufferSamples = 0
   private inSpeech = false
   private silenceSamples = 0
+  private voicedSamples = 0
 
   constructor(config: SegmenterConfig, events: SegmenterEvents = {}) {
     this.config = config
@@ -55,6 +56,7 @@ export class PhraseSegmenter {
       if (voiced) {
         this.inSpeech = true
         this.silenceSamples = 0
+        this.voicedSamples = frame.length
         this.buffer = [...this.preroll]
         this.bufferSamples = this.prerollSamples
         this.preroll = []
@@ -69,6 +71,7 @@ export class PhraseSegmenter {
 
     if (voiced) {
       this.silenceSamples = 0
+      this.voicedSamples += frame.length
     } else {
       this.silenceSamples += frame.length
     }
@@ -92,12 +95,12 @@ export class PhraseSegmenter {
     this.bufferSamples = 0
     this.inSpeech = false
     this.silenceSamples = 0
+    this.voicedSamples = 0
   }
 
   private finishSegment(): void {
     const { sampleRate, minPhraseMs } = this.config
-    const speechSamples = this.bufferSamples - this.silenceSamples
-    const speechMs = (speechSamples / sampleRate) * 1000
+    const speechMs = (this.voicedSamples / sampleRate) * 1000
     const segment = concat(this.buffer, this.bufferSamples)
     this.reset()
     this.events.onSpeechEnd?.()

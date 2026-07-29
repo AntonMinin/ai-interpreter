@@ -1,7 +1,7 @@
 import { app } from 'electron'
 import fs from 'node:fs'
 import path from 'node:path'
-import { DEFAULT_SETTINGS, type Settings } from '../shared/types'
+import { clampSettings, DEFAULT_SETTINGS, type Settings } from '../shared/types'
 import { log } from './logger'
 
 let cached: Settings | null = null
@@ -15,12 +15,12 @@ export function getSettings(): Settings {
   try {
     const raw = fs.readFileSync(settingsPath(), 'utf8')
     const parsed = JSON.parse(raw)
-    cached = {
+    cached = clampSettings({
       ...DEFAULT_SETTINGS,
       ...parsed,
       outbound: { ...DEFAULT_SETTINGS.outbound, ...parsed.outbound },
       inbound: { ...DEFAULT_SETTINGS.inbound, ...parsed.inbound }
-    }
+    })
   } catch {
     cached = { ...DEFAULT_SETTINGS }
   }
@@ -29,12 +29,12 @@ export function getSettings(): Settings {
 
 export function updateSettings(patch: Partial<Settings>): Settings {
   const current = getSettings()
-  cached = {
+  cached = clampSettings({
     ...current,
     ...patch,
     outbound: { ...current.outbound, ...(patch.outbound ?? {}) },
     inbound: { ...current.inbound, ...(patch.inbound ?? {}) }
-  }
+  })
   try {
     fs.writeFileSync(settingsPath(), JSON.stringify(cached, null, 2))
   } catch (error) {

@@ -26,6 +26,8 @@ export interface InterpreterApi {
   getLogPath(): Promise<string>
   clearLogs(): Promise<void>
   openExternal(url: string): Promise<void>
+  registerHotkey(accelerator: string): Promise<boolean>
+  onToggleMute(handler: () => void): () => void
 }
 
 const api: InterpreterApi = {
@@ -41,7 +43,13 @@ const api: InterpreterApi = {
   log: (level, message) => ipcRenderer.invoke(IPC.log, level, message),
   getLogPath: () => ipcRenderer.invoke(IPC.getLogPath),
   clearLogs: () => ipcRenderer.invoke(IPC.clearLogs),
-  openExternal: (url) => ipcRenderer.invoke(IPC.openExternal, url)
+  openExternal: (url) => ipcRenderer.invoke(IPC.openExternal, url),
+  registerHotkey: (accelerator) => ipcRenderer.invoke(IPC.registerHotkey, accelerator),
+  onToggleMute: (handler) => {
+    const listener = (): void => handler()
+    ipcRenderer.on(IPC.hotkeyToggleMute, listener)
+    return () => ipcRenderer.removeListener(IPC.hotkeyToggleMute, listener)
+  }
 }
 
 contextBridge.exposeInMainWorld('interpreter', api)

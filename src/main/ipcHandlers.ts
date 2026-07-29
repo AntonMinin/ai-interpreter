@@ -1,4 +1,4 @@
-import { ipcMain, shell } from 'electron'
+import { BrowserWindow, globalShortcut, ipcMain, shell } from 'electron'
 import { IPC } from '../shared/ipc'
 import type {
   DiagnosticItem,
@@ -94,6 +94,33 @@ export function registerIpcHandlers(): void {
   ipcMain.handle(IPC.openExternal, (_event, url: string) => {
     if (/^https:\/\//.test(url)) shell.openExternal(url)
   })
+
+  ipcMain.handle(IPC.registerHotkey, (_event, accelerator: string): boolean => {
+    return registerMuteHotkey(accelerator)
+  })
+}
+
+let currentHotkey: string | null = null
+
+export function registerMuteHotkey(accelerator: string): boolean {
+  if (currentHotkey) {
+    globalShortcut.unregister(currentHotkey)
+    currentHotkey = null
+  }
+  if (!accelerator) return true
+  try {
+    const ok = globalShortcut.register(accelerator, () => {
+      for (const window of BrowserWindow.getAllWindows()) {
+        window.webContents.send(IPC.hotkeyToggleMute)
+      }
+    })
+    if (ok) currentHotkey = accelerator
+    else log('warn', `Global hotkey "${accelerator}" is already taken by another app.`)
+    return ok
+  } catch (error) {
+    log('warn', `Global hotkey "${accelerator}" is invalid: ${String(error)}`)
+    return false
+  }
 }
 
 async function runMainDiagnostics(): Promise<MainDiagnostics> {
@@ -123,7 +150,10 @@ async function runMainDiagnostics(): Promise<MainDiagnostics> {
   const needsAnthropic = settings.translationProvider === 'anthropic'
 
   try {
-    await fetch('https://api.openai.com/v1', { method: 'HEAD' })
+    await fetch('https://api.openai.com/v1', {
+      method: 'HEAD',
+      signal: AbortSignal.timeout(8000)
+    })
     items.push({ id: 'internet', label: 'Internet connection', status: 'ok', message: 'Online.' })
   } catch {
     items.push({

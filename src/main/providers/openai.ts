@@ -11,6 +11,18 @@ import {
 } from './types'
 
 const BASE_URL = 'https://api.openai.com/v1'
+const REQUEST_TIMEOUT_MS = 30000
+
+async function post(url: string, init: RequestInit, what: string): Promise<Response> {
+  try {
+    return await fetch(url, { ...init, signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS) })
+  } catch (error) {
+    if (error instanceof Error && (error.name === 'TimeoutError' || error.name === 'AbortError')) {
+      throw new ProviderError(`OpenAI ${what} timed out. Check your connection and try again.`)
+    }
+    throw new ProviderError(`Could not reach OpenAI for ${what}. Check your internet connection.`)
+  }
+}
 
 function requireKey(): string {
   const key = getSecret('openai')
@@ -42,11 +54,11 @@ export class OpenAiProvider implements SttProvider, TranslationProvider, TtsProv
     form.append('file', new Blob([new Uint8Array(wav)], { type: 'audio/wav' }), 'audio.wav')
     form.append('model', this.settings().openaiSttModel)
     form.append('language', language)
-    const response = await fetch(`${BASE_URL}/audio/transcriptions`, {
-      method: 'POST',
-      headers: { Authorization: `Bearer ${key}` },
-      body: form
-    })
+    const response = await post(
+      `${BASE_URL}/audio/transcriptions`,
+      { method: 'POST', headers: { Authorization: `Bearer ${key}` }, body: form },
+      'transcription'
+    )
     await raiseForStatus(response, 'transcription')
     const data = (await response.json()) as { text?: string }
     return (data.text ?? '').trim()
@@ -54,27 +66,31 @@ export class OpenAiProvider implements SttProvider, TranslationProvider, TtsProv
 
   async translate(text: string, sourceLanguage: string, targetLanguage: string): Promise<string> {
     const key = requireKey()
-    const response = await fetch(`${BASE_URL}/chat/completions`, {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${key}`,
-        'Content-Type': 'application/json'
+    const response = await post(
+      `${BASE_URL}/chat/completions`,
+      {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${key}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          model: this.settings().openaiTranslationModel,
+          messages: [
+            {
+              role: 'system',
+              content:
+                `You are a professional simultaneous interpreter. Translate the user's message from ` +
+                `${languageName(sourceLanguage)} to ${languageName(targetLanguage)}. ` +
+                `Preserve tone and meaning. Output only the translation, nothing else.`
+            },
+            { role: 'user', content: text }
+          ],
+          temperature: 0.2
+        })
       },
-      body: JSON.stringify({
-        model: this.settings().openaiTranslationModel,
-        messages: [
-          {
-            role: 'system',
-            content:
-              `You are a professional simultaneous interpreter. Translate the user's message from ` +
-              `${languageName(sourceLanguage)} to ${languageName(targetLanguage)}. ` +
-              `Preserve tone and meaning. Output only the translation, nothing else.`
-          },
-          { role: 'user', content: text }
-        ],
-        temperature: 0.2
-      })
-    })
+      'translation'
+    )
     await raiseForStatus(response, 'translation')
     const data = (await response.json()) as {
       choices?: { message?: { content?: string } }[]
@@ -85,22 +101,26 @@ export class OpenAiProvider implements SttProvider, TranslationProvider, TtsProv
   async synthesize(text: string): Promise<SynthesizeResult> {
     const key = requireKey()
     const settings = this.settings()
-    const response = await fetch(`${BASE_URL}/audio/speech`, {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${key}`,
-        'Content-Type': 'application/json'
+    const response = await post(
+      `${BASE_URL}/audio/speech`,
+      {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${key}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          model: settings.openaiTtsModel,
+          voice: settings.openaiTtsVoice,
+          input: text,
+          response_format: 'mp3'
+        })
       },
-      body: JSON.stringify({
-        model: settings.openaiTtsModel,
-        voice: settings.openaiTtsVoice,
-        input: text,
-        response_format: 'wav'
-      })
-    })
+      'speech synthesis'
+    )
     await raiseForStatus(response, 'speech synthesis')
     const audio = Buffer.from(await response.arrayBuffer())
-    return { audioBase64: audio.toString('base64'), mimeType: 'audio/wav' }
+    return { audioBase64: audio.toString('base64'), mimeType: 'audio/mpeg' }
   }
 
   async testKey(): Promise<KeyTestResult> {
@@ -108,7 +128,8 @@ export class OpenAiProvider implements SttProvider, TranslationProvider, TtsProv
     if (!key) return { ok: false, message: 'No OpenAI API key set.' }
     try {
       const response = await fetch(`${BASE_URL}/models`, {
-        headers: { Authorization: `Bearer ${key}` }
+        headers: { Authorization: `Bearer ${key}` },
+        signal: AbortSignal.timeout(10000)
       })
       if (response.status === 401) return { ok: false, message: 'OpenAI API key is invalid.' }
       if (!response.ok) return { ok: false, message: `OpenAI returned HTTP ${response.status}.` }

@@ -41,7 +41,7 @@ export function reducePipeline(state: PipelineState, event: PipelineEvent): Pipe
     case 'START':
       return { ...initialPipelineState, running: true }
     case 'STOP':
-      return { ...initialPipelineState }
+      return { ...initialPipelineState, error: state.error }
     case 'SPEECH_START':
       return state.running ? { ...state, capturing: true } : state
     case 'SPEECH_END':

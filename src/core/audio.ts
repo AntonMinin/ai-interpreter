@@ -3,6 +3,16 @@ export function resample(samples: Float32Array, fromRate: number, toRate: number
   const ratio = fromRate / toRate
   const outLength = Math.floor(samples.length / ratio)
   const out = new Float32Array(outLength)
+  if (ratio > 1) {
+    for (let i = 0; i < outLength; i++) {
+      const start = Math.floor(i * ratio)
+      const end = Math.max(start + 1, Math.min(samples.length, Math.floor((i + 1) * ratio)))
+      let sum = 0
+      for (let j = start; j < end; j++) sum += samples[j]
+      out[i] = sum / (end - start)
+    }
+    return out
+  }
   for (let i = 0; i < outLength; i++) {
     const pos = i * ratio
     const left = Math.floor(pos)

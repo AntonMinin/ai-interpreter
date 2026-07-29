@@ -47,6 +47,9 @@ async function attachWorklet(
     onFrame(event.data, context.sampleRate)
   }
   source.connect(node)
+  const mute = context.createGain()
+  mute.gain.value = 0
+  node.connect(mute).connect(context.destination)
   return node
 }
 

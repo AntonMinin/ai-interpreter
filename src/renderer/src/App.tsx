@@ -29,7 +29,10 @@ export function App(): React.JSX.Element {
   const [running, setRunning] = useState(false)
   const [busy, setBusy] = useState(false)
   const [testResult, setTestResult] = useState<string | null>(null)
+  const [muted, setMuted] = useState(false)
+  const [hotkeyTaken, setHotkeyTaken] = useState(false)
   const controllerRef = useRef<InterpreterController | null>(null)
+  const lastLevelAt = useRef(0)
 
   const uiLanguage = normalizeUiLanguage(settings?.interfaceLanguage ?? 'en')
   const t = makeT(uiLanguage)
@@ -41,30 +44,55 @@ export function App(): React.JSX.Element {
   useEffect(() => {
     void (async () => {
       const loaded = await window.interpreter.getSettings()
+      controllerRef.current = new InterpreterController(loaded, {
+        onStatus: setStatus,
+        onError: setError,
+        onInputLevel: (rms) => {
+          const now = performance.now()
+          if (rms > 0 && now - lastLevelAt.current < 80) return
+          lastLevelAt.current = now
+          setInputLevel(rms)
+        },
+        onOutputActive: setOutputActive,
+        onTranscript: (entry) =>
+          setEntries((prev) => [entry, ...prev].slice(0, MAX_TRANSCRIPT_ENTRIES)),
+        onStopped: () => {
+          setRunning(false)
+          setMuted(false)
+        }
+      })
       setSettings(loaded)
       setKeyStatus(await window.interpreter.getKeyStatus())
       await refreshDevices()
       if (!loaded.onboardingComplete) setScreen('onboarding')
-
-      controllerRef.current = new InterpreterController(loaded, {
-        onStatus: setStatus,
-        onError: setError,
-        onInputLevel: setInputLevel,
-        onOutputActive: setOutputActive,
-        onTranscript: (entry) =>
-          setEntries((prev) => [entry, ...prev].slice(0, MAX_TRANSCRIPT_ENTRIES))
-      })
     })()
+    const stopHotkey = window.interpreter.onToggleMute(() => {
+      const controller = controllerRef.current
+      if (!controller?.isRunning) return
+      controller.setMuted(!controller.isMuted)
+      setMuted(controller.isMuted)
+    })
     navigator.mediaDevices.addEventListener('devicechange', refreshDevices)
-    return () => navigator.mediaDevices.removeEventListener('devicechange', refreshDevices)
+    return () => {
+      stopHotkey()
+      navigator.mediaDevices.removeEventListener('devicechange', refreshDevices)
+    }
   }, [refreshDevices])
+
+  useEffect(() => {
+    if (!settings) return
+    void window.interpreter
+      .registerHotkey(settings.muteHotkey)
+      .then((ok) => setHotkeyTaken(!ok))
+  }, [settings?.muteHotkey])
 
   useEffect(() => {
     if (!settings) return undefined
     const handleKey = (down: boolean) => (event: KeyboardEvent) => {
       if (settings.captureMode !== 'push-to-talk') return
       if (event.code === settings.pushToTalkKey && !event.repeat) {
-        if ((event.target as HTMLElement)?.tagName === 'INPUT') return
+        const tag = (event.target as HTMLElement)?.tagName
+        if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return
         event.preventDefault()
         controllerRef.current?.setPttDown(down)
       }
@@ -102,6 +130,7 @@ export function App(): React.JSX.Element {
         controller.clearError()
         await controller.start()
         setRunning(true)
+        setMuted(false)
       }
     } catch {
       setRunning(false)
@@ -169,6 +198,24 @@ export function App(): React.JSX.Element {
   if (settings.translationProvider === 'mock') {
     warnings.push(t('warn.mockActive'))
   }
+  if (!settings.outbound.enabled && !settings.inbound.enabled) {
+    warnings.push(t('warn.nothingEnabled'))
+  }
+  if (settings.inbound.enabled && !settings.inbound.speak && !settings.inbound.subtitles) {
+    warnings.push(t('warn.inboundSilent'))
+  }
+  const savedIds = [
+    settings.virtualOutputDeviceId,
+    settings.monitorDeviceId,
+    settings.micDeviceId
+  ].filter((id) => id && id !== 'default')
+  const known = new Set([...devices.inputs, ...devices.outputs].map((d) => d.deviceId))
+  if (devices.outputs.length > 0 && savedIds.some((id) => !known.has(id))) {
+    warnings.push(t('warn.deviceMissing'))
+  }
+  if (hotkeyTaken) {
+    warnings.push(t('warn.hotkeyTaken', { key: settings.muteHotkey }))
+  }
 
   return (
     <I18nContext.Provider value={uiLanguage}>
@@ -213,7 +260,14 @@ export function App(): React.JSX.Element {
             entries={entries}
             running={running}
             busy={busy}
+            muted={muted}
             testResult={testResult}
+            onToggleMute={() => {
+              const controller = controllerRef.current
+              if (!controller?.isRunning) return
+              controller.setMuted(!controller.isMuted)
+              setMuted(controller.isMuted)
+            }}
             onToggle={() => void toggleRunning()}
             onTestAudio={() => void testAudio()}
             onTestTranslation={() => void testTranslation()}

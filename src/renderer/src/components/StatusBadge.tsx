@@ -14,7 +14,7 @@ const STATUS_COLORS: Record<PipelineStatus, string> = {
 export function StatusBadge({ status }: { status: PipelineStatus }): React.JSX.Element {
   const t = useT()
   return (
-    <span className="status-badge">
+    <span className="status-badge" role="status" aria-live="polite">
       <span className="status-dot" style={{ background: STATUS_COLORS[status] }} />
       {t(`status.${status}`)}
     </span>

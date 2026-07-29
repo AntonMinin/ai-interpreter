@@ -19,10 +19,23 @@ export function getLogPath(): string {
   return logFile
 }
 
+const MAX_LOG_BYTES = 2 * 1024 * 1024
+
+function rotateIfLarge(file: string): void {
+  try {
+    if (fs.statSync(file).size < MAX_LOG_BYTES) return
+    fs.renameSync(file, `${file}.old`)
+  } catch {
+    return
+  }
+}
+
 export function log(level: 'info' | 'warn' | 'error' | 'debug', message: string): void {
   const line = `${new Date().toISOString()} [${level.toUpperCase()}] ${redact(message)}\n`
   try {
-    fs.appendFileSync(getLogPath(), line)
+    const file = getLogPath()
+    rotateIfLarge(file)
+    fs.appendFileSync(file, line)
   } catch {
     return
   }
@@ -32,6 +45,7 @@ export function log(level: 'info' | 'warn' | 'error' | 'debug', message: string)
 export function clearLogs(): void {
   try {
     fs.writeFileSync(getLogPath(), '')
+    fs.rmSync(`${getLogPath()}.old`, { force: true })
   } catch {
     return
   }

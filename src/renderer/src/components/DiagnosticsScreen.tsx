@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import type { DiagnosticItem, Settings } from '../../../shared/types'
 import { findVirtualCable, listDevices, requestMicPermission } from '../audio/devices'
 import { useT } from '../i18n'
@@ -9,8 +9,11 @@ export function DiagnosticsScreen({ settings }: { settings: Settings }): React.J
   const t = useT()
   const [items, setItems] = useState<DiagnosticItem[] | null>(null)
   const [running, setRunning] = useState(false)
+  const latest = useRef({ settings, t })
+  latest.current = { settings, t }
 
   const run = useCallback(async (): Promise<void> => {
+    const { settings, t } = latest.current
     setRunning(true)
     const results: DiagnosticItem[] = []
 
@@ -110,7 +113,7 @@ export function DiagnosticsScreen({ settings }: { settings: Settings }): React.J
 
     setItems(results)
     setRunning(false)
-  }, [settings, t])
+  }, [])
 
   useEffect(() => {
     void run()

@@ -17,8 +17,10 @@ interface MainScreenProps {
   entries: TranscriptEntry[]
   running: boolean
   busy: boolean
+  muted: boolean
   testResult: string | null
   onToggle(): void
+  onToggleMute(): void
   onTestAudio(): void
   onTestTranslation(): void
   onClearError(): void
@@ -58,12 +60,23 @@ export function MainScreen(props: MainScreenProps): React.JSX.Element {
         <button
           className={`start-button ${props.running ? 'running' : ''}`}
           onClick={props.onToggle}
-          disabled={props.busy}
+          disabled={props.busy || (!settings.outbound.enabled && !settings.inbound.enabled)}
         >
           {props.busy ? '...' : props.running ? t('main.stop') : t('main.start')}
         </button>
+        <button
+          className={props.muted ? 'danger' : ''}
+          onClick={props.onToggleMute}
+          disabled={!props.running}
+        >
+          {props.muted ? t('main.unmute') : t('main.mute')}
+          {settings.muteHotkey ? ` · ${settings.muteHotkey}` : ''}
+        </button>
         <div style={{ width: '100%' }}>
-          <LevelMeter level={Math.min(1, props.inputLevel * 8)} label={t('main.micInput')} />
+          <LevelMeter
+            level={props.muted ? 0 : Math.min(1, props.inputLevel * 8)}
+            label={props.muted ? t('main.micMuted') : t('main.micInput')}
+          />
           <LevelMeter level={props.outputActive ? 0.85 : 0} label={t('main.translatedOutput')} />
         </div>
         <div style={{ width: '100%' }}>
@@ -110,7 +123,7 @@ export function MainScreen(props: MainScreenProps): React.JSX.Element {
       <div style={{ display: 'flex', flexDirection: 'column', gap: 16, minHeight: 0 }}>
         <div>
           {props.error && (
-            <div className="error-box">
+            <div className="error-box" role="alert">
               <span>{props.error}</span>
               <button onClick={props.onClearError}>{t('main.dismiss')}</button>
             </div>

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import type { KeyStatus, ProviderId, Settings } from '../../../shared/types'
 import { computeRms } from '../../../core/segmenter'
 import { arrayBufferToBase64, encodeWav, generateTone } from '../../../core/audio'
@@ -27,8 +27,8 @@ export function OnboardingWizard(props: OnboardingProps): React.JSX.Element {
   const [micHeard, setMicHeard] = useState(false)
   const [message, setMessage] = useState<string | null>(null)
   const [apiKey, setApiKey] = useState('')
+  const [anthropicKey, setAnthropicKey] = useState('')
   const [translationOk, setTranslationOk] = useState(false)
-  const micRef = useRef<MicCapture | null>(null)
 
   const { settings, devices } = props
   const cable = findVirtualCable(devices.outputs)
@@ -36,16 +36,12 @@ export function OnboardingWizard(props: OnboardingProps): React.JSX.Element {
   useEffect(() => {
     if (step === 2) {
       const mic = new MicCapture()
-      micRef.current = mic
       void mic.start(settings.micDeviceId, settings.noiseSuppression, (frame) => {
         const rms = computeRms(frame)
         setMicLevel(rms)
         if (rms > settings.vadThreshold * 1.5) setMicHeard(true)
       })
-      return () => {
-        void mic.stop()
-        micRef.current = null
-      }
+      return () => void mic.stop()
     }
     return undefined
   }, [step, settings.micDeviceId, settings.noiseSuppression, settings.vadThreshold])
@@ -226,7 +222,33 @@ export function OnboardingWizard(props: OnboardingProps): React.JSX.Element {
                   {t('set.save')}
                 </button>
               </div>
-              <span className="hint">{t('ob.anthropicLater')}</span>
+              <span className="hint">{t('ob.openaiAlwaysNeeded')}</span>
+            </div>
+          )}
+          {settings.translationProvider === 'anthropic' && (
+            <div className="field">
+              <label>
+                {t('set.anthropicKey')} {props.keyStatus.anthropic ? t('ob.savedMark') : ''}
+              </label>
+              <div className="field-row">
+                <input
+                  type="password"
+                  placeholder="sk-ant-..."
+                  value={anthropicKey}
+                  onChange={(e) => setAnthropicKey(e.target.value)}
+                />
+                <button
+                  disabled={!anthropicKey}
+                  onClick={() =>
+                    void props.onSaveKey('anthropic', anthropicKey).then(() => {
+                      setAnthropicKey('')
+                      setMessage(t('ob.keySaved'))
+                    })
+                  }
+                >
+                  {t('set.save')}
+                </button>
+              </div>
             </div>
           )}
         </div>

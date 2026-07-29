@@ -32,15 +32,12 @@ function loadAll(): Record<string, string> {
   } catch {
     cached = {}
   }
-  applyEnvOverrides(cached)
   return cached
 }
 
-function applyEnvOverrides(store: Record<string, string>): void {
-  if (process.env.OPENAI_API_KEY && !store.openai) store.openai = process.env.OPENAI_API_KEY
-  if (process.env.ANTHROPIC_API_KEY && !store.anthropic) {
-    store.anthropic = process.env.ANTHROPIC_API_KEY
-  }
+function fromEnv(name: SecretName): string | null {
+  const value = name === 'openai' ? process.env.OPENAI_API_KEY : process.env.ANTHROPIC_API_KEY
+  return value && value.trim() !== '' ? value.trim() : null
 }
 
 function persist(): void {
@@ -59,7 +56,7 @@ function persist(): void {
 }
 
 export function getSecret(name: SecretName): string | null {
-  return loadAll()[name] ?? null
+  return loadAll()[name] ?? fromEnv(name)
 }
 
 export function setSecret(name: SecretName, value: string): void {
@@ -73,6 +70,5 @@ export function setSecret(name: SecretName, value: string): void {
 }
 
 export function secretStatus(): { openai: boolean; anthropic: boolean } {
-  const store = loadAll()
-  return { openai: Boolean(store.openai), anthropic: Boolean(store.anthropic) }
+  return { openai: Boolean(getSecret('openai')), anthropic: Boolean(getSecret('anthropic')) }
 }

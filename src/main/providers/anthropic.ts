@@ -10,7 +10,7 @@ function client(): Anthropic {
   if (!key) {
     throw new ProviderError('Anthropic API key is not set. Add it in Settings.')
   }
-  return new Anthropic({ apiKey: key })
+  return new Anthropic({ apiKey: key, timeout: 30000, maxRetries: 1 })
 }
 
 export class AnthropicProvider implements TranslationProvider, KeyValidator {

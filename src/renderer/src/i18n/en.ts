@@ -28,7 +28,10 @@ export const en: Record<string, string> = {
   'main.unknownDevice': 'Unknown device',
   'main.monitor': 'Your speakers / headphones',
   'main.ptt': 'Push-to-talk',
-  'main.pttHold': 'Hold {key} while speaking',
+  'main.pttHold': 'Hold {key} while speaking (this window must be focused)',
+  'main.mute': 'Mute microphone',
+  'main.unmute': 'Unmute microphone',
+  'main.micMuted': 'Microphone muted',
   'main.testAudio': 'Test audio',
   'main.testTranslation': 'Test translation',
   'main.liveTranscript': 'Live transcript',
@@ -45,6 +48,13 @@ export const en: Record<string, string> = {
   'warn.noOpenAiKey': 'OpenAI API key is not set. Add it in Settings before starting.',
   'warn.noAnthropicKey': 'Anthropic API key is not set. Add it in Settings before starting.',
   'warn.mockActive': 'Mock provider is active — translations are not real.',
+  'warn.deviceMissing':
+    'A saved audio device is no longer available. Re-pick your devices in Settings.',
+  'warn.inboundSilent':
+    'Incoming translation is enabled but both subtitles and voice are off — nothing will be shown.',
+  'warn.nothingEnabled': 'No translation direction is enabled. Turn one on in Settings.',
+  'warn.hotkeyTaken':
+    'Global hotkey "{key}" is taken by another app. Pick a different one in Settings.',
 
   'test.playingTone': 'Playing a test tone to your speakers and the virtual output…',
   'test.toneBoth': 'Test tone played to your speakers and to the virtual microphone.',
@@ -80,6 +90,11 @@ export const en: Record<string, string> = {
   'set.captureAuto': 'Automatic (voice activity detection)',
   'set.capturePtt': 'Push-to-talk',
   'set.pttKey': 'Push-to-talk key (press a key in this box)',
+  'set.pttFocusHint':
+    'Push-to-talk only works while this window is focused. Use the global mute hotkey below to control the microphone from inside your meeting.',
+  'set.muteHotkey': 'Global mute hotkey (works from any app)',
+  'set.muteHotkeyHint':
+    'Electron accelerator format, e.g. Control+Shift+Space or Alt+M. Leave empty to disable.',
   'set.noiseSuppression': 'Noise suppression',
   'set.sensitivity': 'Voice sensitivity ({value})',
   'set.minPhrase': 'Min phrase length (ms)',
@@ -93,7 +108,8 @@ export const en: Record<string, string> = {
   'prov.anthropic': 'Anthropic (Claude)',
   'prov.mock': 'Mock (offline testing)',
   'set.claudeModel': 'Claude model',
-  'set.claudeModelHint': 'Default: claude-opus-4-8. For lower latency you can use claude-haiku-4-5.',
+  'set.claudeModelHint':
+    'Default: claude-opus-5. For lower latency and cost try claude-sonnet-5 or claude-haiku-4-5.',
   'set.ttsVoice': 'TTS voice (OpenAI)',
   'set.apiKeys': 'API keys',
   'set.openaiKey': 'OpenAI API key',
@@ -141,7 +157,8 @@ export const en: Record<string, string> = {
   'ob.provMock': 'Mock provider (no key, no real translation)',
   'ob.savedMark': '✓ saved',
   'ob.keySaved': 'Key saved.',
-  'ob.anthropicLater': 'Anthropic key (if selected) can be added later in Settings.',
+  'ob.openaiAlwaysNeeded':
+    'The OpenAI key is always needed — speech recognition and voice run through OpenAI.',
   'ob.translationTitle': 'Check translation',
   'ob.testPhraseLabel': 'Test phrase:',
   'ob.translateBtn': 'Translate test phrase',

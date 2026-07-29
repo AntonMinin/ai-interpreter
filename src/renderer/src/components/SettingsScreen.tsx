@@ -65,6 +65,7 @@ export function SettingsScreen(props: SettingsScreenProps): React.JSX.Element {
   const [openaiKey, setOpenaiKey] = useState('')
   const [anthropicKey, setAnthropicKey] = useState('')
   const [keyMessage, setKeyMessage] = useState<string | null>(null)
+  const [hotkeyDraft, setHotkeyDraft] = useState(settings.muteHotkey)
 
   const set = props.onChange
 
@@ -234,8 +235,22 @@ export function SettingsScreen(props: SettingsScreenProps): React.JSX.Element {
                 set({ pushToTalkKey: e.code })
               }}
             />
+            <span className="hint">{t('set.pttFocusHint')}</span>
           </div>
         )}
+        <div className="field">
+          <label>{t('set.muteHotkey')}</label>
+          <input
+            type="text"
+            value={hotkeyDraft}
+            onChange={(e) => setHotkeyDraft(e.target.value)}
+            onBlur={() => set({ muteHotkey: hotkeyDraft.trim() })}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') set({ muteHotkey: hotkeyDraft.trim() })
+            }}
+          />
+          <span className="hint">{t('set.muteHotkeyHint')}</span>
+        </div>
         <div className="checkbox-row">
           <input
             type="checkbox"
@@ -263,6 +278,9 @@ export function SettingsScreen(props: SettingsScreenProps): React.JSX.Element {
             <label>{t('set.minPhrase')}</label>
             <input
               type="number"
+              min={100}
+              max={5000}
+              step={50}
               value={settings.minPhraseMs}
               onChange={(e) => set({ minPhraseMs: Number(e.target.value) })}
             />
@@ -271,6 +289,9 @@ export function SettingsScreen(props: SettingsScreenProps): React.JSX.Element {
             <label>{t('set.pauseBeforeSend')}</label>
             <input
               type="number"
+              min={150}
+              max={3000}
+              step={50}
               value={settings.maxSilenceMs}
               onChange={(e) => set({ maxSilenceMs: Number(e.target.value) })}
             />
@@ -279,6 +300,9 @@ export function SettingsScreen(props: SettingsScreenProps): React.JSX.Element {
             <label>{t('set.maxPhrase')}</label>
             <input
               type="number"
+              min={2000}
+              max={30000}
+              step={500}
               value={settings.maxPhraseMs}
               onChange={(e) => set({ maxPhraseMs: Number(e.target.value) })}
             />

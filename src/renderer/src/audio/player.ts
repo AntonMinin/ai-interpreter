@@ -12,6 +12,7 @@ export class AudioQueuePlayer {
   private current: HTMLAudioElement | null = null
   private busy = false
   private currentUrl: string | null = null
+  private resolveCurrent: (() => void) | null = null
 
   constructor(
     private readonly getSinkId: () => string,
@@ -33,9 +34,15 @@ export class AudioQueuePlayer {
     for (const item of this.queue) item.resolve()
     this.queue = []
     if (this.current) {
+      this.current.onended = null
+      this.current.onerror = null
       this.current.pause()
       this.current.src = ''
       this.current = null
+    }
+    if (this.resolveCurrent) {
+      this.resolveCurrent()
+      this.resolveCurrent = null
     }
     if (this.currentUrl) {
       URL.revokeObjectURL(this.currentUrl)
@@ -60,8 +67,8 @@ export class AudioQueuePlayer {
       item.reject(error instanceof Error ? error : new Error(String(error)))
     } finally {
       this.busy = false
-      this.onStateChange?.(false)
       if (this.queue.length > 0) void this.drain()
+      else this.onStateChange?.(false)
     }
   }
 
@@ -72,11 +79,13 @@ export class AudioQueuePlayer {
       const audio = new Audio()
       this.current = audio
       this.currentUrl = url
+      this.resolveCurrent = resolve
 
       const cleanup = (): void => {
         URL.revokeObjectURL(url)
         if (this.current === audio) this.current = null
         this.currentUrl = null
+        this.resolveCurrent = null
       }
 
       audio.onended = () => {

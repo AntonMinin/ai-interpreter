@@ -13,12 +13,15 @@ import { AudioQueuePlayer } from '../audio/player'
 
 const TARGET_SAMPLE_RATE = 16000
 
+const MAX_CONSECUTIVE_FAILURES = 3
+
 export interface ControllerCallbacks {
   onStatus(status: PipelineStatus): void
   onError(message: string | null): void
   onInputLevel(rms: number): void
   onOutputActive(active: boolean): void
   onTranscript(entry: TranscriptEntry): void
+  onStopped(): void
 }
 
 export class InterpreterController {
@@ -34,6 +37,12 @@ export class InterpreterController {
   private pttDown = false
   private running = false
   private entryCounter = 0
+  private turn: Record<'outbound' | 'inbound', Promise<void>> = {
+    outbound: Promise.resolve(),
+    inbound: Promise.resolve()
+  }
+  private consecutiveFailures = 0
+  private muted = false
 
   constructor(settings: Settings, callbacks: ControllerCallbacks) {
     this.settings = settings
@@ -54,7 +63,16 @@ export class InterpreterController {
   }
 
   updateSettings(settings: Settings): void {
+    const previous = this.settings
     this.settings = settings
+    const micChanged =
+      previous.micDeviceId !== settings.micDeviceId ||
+      previous.noiseSuppression !== settings.noiseSuppression
+    if (this.running && micChanged && settings.outbound.enabled) {
+      void this.startOutbound().catch((error) =>
+        this.fail('capture', error instanceof Error ? error.message : String(error))
+      )
+    }
     const segmenterConfig = {
       vadThreshold: settings.vadThreshold,
       minPhraseMs: settings.minPhraseMs,
@@ -71,6 +89,19 @@ export class InterpreterController {
     if (!down) this.outboundSegmenter?.flush()
   }
 
+  setMuted(muted: boolean): void {
+    if (this.muted === muted) return
+    this.muted = muted
+    if (muted) {
+      this.outboundSegmenter?.reset()
+      this.callbacks.onInputLevel(0)
+    }
+  }
+
+  get isMuted(): boolean {
+    return this.muted
+  }
+
   get isRunning(): boolean {
     return this.running
   }
@@ -78,10 +109,14 @@ export class InterpreterController {
   async start(): Promise<void> {
     if (this.running) return
     this.running = true
+    this.muted = false
+    this.consecutiveFailures = 0
+    this.turn = { outbound: Promise.resolve(), inbound: Promise.resolve() }
     this.dispatch({ type: 'START' })
     try {
       if (this.settings.outbound.enabled) await this.startOutbound()
-      if (this.settings.inbound.enabled) await this.startInbound()
+      const inbound = this.settings.inbound
+      if (inbound.enabled && (inbound.speak || inbound.subtitles)) await this.startInbound()
     } catch (error) {
       this.running = false
       await this.shutdownCapture()
@@ -131,7 +166,7 @@ export class InterpreterController {
     await this.mic.start(settings.micDeviceId, settings.noiseSuppression, (frame, rate) => {
       sampleRate = rate
       this.outboundSegmenter?.updateConfig({ sampleRate: rate })
-      if (this.settings.captureMode === 'push-to-talk' && !this.pttDown) {
+      if (this.muted || (this.settings.captureMode === 'push-to-talk' && !this.pttDown)) {
         this.callbacks.onInputLevel(0)
         return
       }
@@ -160,7 +195,10 @@ export class InterpreterController {
     await this.loopback.start((frame, rate) => {
       sampleRate = rate
       this.inboundSegmenter?.updateConfig({ sampleRate: rate })
-      if (this.monitorPlayer.playing) return
+      if (this.monitorPlayer.playing) {
+        this.inboundSegmenter?.reset()
+        return
+      }
       this.inboundSegmenter?.push(frame)
     })
   }
@@ -171,6 +209,24 @@ export class InterpreterController {
     direction: 'outbound' | 'inbound'
   ): Promise<void> {
     if (!this.running) return
+    const previousTurn = this.turn[direction]
+    let finishTurn = (): void => {}
+    this.turn[direction] = new Promise<void>((resolve) => {
+      finishTurn = resolve
+    })
+    try {
+      await this.runSegment(samples, sampleRate, direction, previousTurn)
+    } finally {
+      finishTurn()
+    }
+  }
+
+  private async runSegment(
+    samples: Float32Array,
+    sampleRate: number,
+    direction: 'outbound' | 'inbound',
+    previousTurn: Promise<void>
+  ): Promise<void> {
     const config =
       direction === 'outbound'
         ? this.settings.outbound
@@ -208,36 +264,41 @@ export class InterpreterController {
       this.dispatch({ type: 'TRANSLATE_END' })
     }
     if (!translatedText || !this.running) return
-
-    this.callbacks.onTranscript({
-      id: `t${Date.now()}-${this.entryCounter++}`,
-      direction,
-      sourceLanguage: config.sourceLanguage,
-      targetLanguage: config.targetLanguage,
-      sourceText,
-      translatedText,
-      timestamp: Date.now()
-    })
+    this.consecutiveFailures = 0
 
     const shouldSpeak =
       direction === 'outbound' || (direction === 'inbound' && this.settings.inbound.speak)
-    if (!shouldSpeak) return
-
-    this.dispatch({ type: 'TTS_START' })
-    let audio: { audioBase64: string; mimeType: string }
-    try {
-      audio = await window.interpreter.synthesize({
-        text: translatedText,
-        language: config.targetLanguage
-      })
-    } catch (error) {
-      this.fail('tts', error instanceof Error ? error.message : 'Speech synthesis failed.')
-      return
-    } finally {
-      this.dispatch({ type: 'TTS_END' })
+    let audio: { audioBase64: string; mimeType: string } | null = null
+    if (shouldSpeak) {
+      this.dispatch({ type: 'TTS_START' })
+      try {
+        audio = await window.interpreter.synthesize({
+          text: translatedText,
+          language: config.targetLanguage
+        })
+      } catch (error) {
+        this.fail('tts', error instanceof Error ? error.message : 'Speech synthesis failed.')
+      } finally {
+        this.dispatch({ type: 'TTS_END' })
+      }
     }
+
+    await previousTurn
     if (!this.running) return
 
+    if (direction === 'outbound' || this.settings.inbound.subtitles) {
+      this.callbacks.onTranscript({
+        id: `t${Date.now()}-${this.entryCounter++}`,
+        direction,
+        sourceLanguage: config.sourceLanguage,
+        targetLanguage: config.targetLanguage,
+        sourceText,
+        translatedText,
+        timestamp: Date.now()
+      })
+    }
+
+    if (!audio) return
     const player = direction === 'outbound' ? this.outboundPlayer : this.monitorPlayer
     try {
       await player.enqueue(audio.audioBase64, audio.mimeType)
@@ -254,6 +315,17 @@ export class InterpreterController {
   private fail(stage: string, message: string): void {
     void window.interpreter.log('error', `[${stage}] ${message}`)
     this.dispatch({ type: 'ERROR', message })
+    this.consecutiveFailures++
+    if (this.consecutiveFailures >= MAX_CONSECUTIVE_FAILURES && this.running) {
+      void window.interpreter.log(
+        'error',
+        `Stopping after ${this.consecutiveFailures} consecutive failures.`
+      )
+      void this.stop().then(() => {
+        this.dispatch({ type: 'ERROR', message })
+        this.callbacks.onStopped()
+      })
+    }
   }
 
   clearError(): void {

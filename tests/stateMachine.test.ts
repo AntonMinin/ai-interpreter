@@ -82,13 +82,19 @@ describe('pipeline state machine', () => {
     expect(deriveStatus(run([{ type: 'CLEAR_ERROR' }], errored))).toBe('ready')
   })
 
-  it('STOP resets everything', () => {
+  it('STOP resets work but keeps the error visible', () => {
     const state = run([
       { type: 'START' },
       { type: 'STT_START' },
       { type: 'ERROR', message: 'x' },
       { type: 'STOP' }
     ])
-    expect(state).toEqual(initialPipelineState)
+    expect(state).toEqual({ ...initialPipelineState, error: 'x' })
+    expect(deriveStatus(state)).toBe('error')
+  })
+
+  it('START clears a previous error', () => {
+    const state = run([{ type: 'ERROR', message: 'x' }, { type: 'START' }])
+    expect(deriveStatus(state)).toBe('ready')
   })
 })

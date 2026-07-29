@@ -1,7 +1,8 @@
-import { app, BrowserWindow, desktopCapturer, session, shell } from 'electron'
+import { app, BrowserWindow, desktopCapturer, globalShortcut, session, shell } from 'electron'
 import path from 'node:path'
-import { registerIpcHandlers } from './ipcHandlers'
+import { registerIpcHandlers, registerMuteHotkey } from './ipcHandlers'
 import { log } from './logger'
+import { getSettings } from './settings'
 
 function createWindow(): void {
   const window = new BrowserWindow({
@@ -62,12 +63,17 @@ app.whenReady().then(() => {
   )
 
   createWindow()
+  registerMuteHotkey(getSettings().muteHotkey)
 
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) createWindow()
   })
 
   log('info', `AI Interpreter started (v${app.getVersion()})`)
+})
+
+app.on('will-quit', () => {
+  globalShortcut.unregisterAll()
 })
 
 app.on('window-all-closed', () => {

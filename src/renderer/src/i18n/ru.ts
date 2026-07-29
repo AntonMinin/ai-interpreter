@@ -28,7 +28,10 @@ export const ru: Record<string, string> = {
   'main.unknownDevice': 'Неизвестное устройство',
   'main.monitor': 'Ваши колонки / наушники',
   'main.ptt': 'Push-to-talk',
-  'main.pttHold': 'Удерживайте {key} во время речи',
+  'main.pttHold': 'Удерживайте {key} во время речи (окно должно быть в фокусе)',
+  'main.mute': 'Выключить микрофон',
+  'main.unmute': 'Включить микрофон',
+  'main.micMuted': 'Микрофон выключен',
   'main.testAudio': 'Тест звука',
   'main.testTranslation': 'Тест перевода',
   'main.liveTranscript': 'Живая расшифровка',
@@ -45,6 +48,13 @@ export const ru: Record<string, string> = {
   'warn.noOpenAiKey': 'API-ключ OpenAI не задан. Добавьте его в Настройках перед стартом.',
   'warn.noAnthropicKey': 'API-ключ Anthropic не задан. Добавьте его в Настройках перед стартом.',
   'warn.mockActive': 'Включён мок-провайдер — переводы не настоящие.',
+  'warn.deviceMissing':
+    'Сохранённое аудиоустройство больше недоступно. Выберите устройства заново в Настройках.',
+  'warn.inboundSilent':
+    'Перевод входящей речи включён, но субтитры и голос выключены — вы ничего не увидите.',
+  'warn.nothingEnabled': 'Ни одно направление перевода не включено. Включите его в Настройках.',
+  'warn.hotkeyTaken':
+    'Глобальная горячая клавиша «{key}» занята другим приложением. Выберите другую в Настройках.',
 
   'test.playingTone': 'Проигрываю тестовый тон в колонки и виртуальный выход…',
   'test.toneBoth': 'Тестовый тон проигран в ваши колонки и в виртуальный микрофон.',
@@ -79,6 +89,11 @@ export const ru: Record<string, string> = {
   'set.captureAuto': 'Автоматический (детекция голоса)',
   'set.capturePtt': 'Push-to-talk',
   'set.pttKey': 'Клавиша push-to-talk (нажмите клавишу в этом поле)',
+  'set.pttFocusHint':
+    'Push-to-talk работает только когда это окно в фокусе. Чтобы управлять микрофоном из митинга, используйте глобальную горячую клавишу ниже.',
+  'set.muteHotkey': 'Глобальная клавиша выключения микрофона (работает из любого приложения)',
+  'set.muteHotkeyHint':
+    'Формат Electron accelerator, например Control+Shift+Space или Alt+M. Пустое значение отключает.',
   'set.noiseSuppression': 'Шумоподавление',
   'set.sensitivity': 'Чувствительность к голосу ({value})',
   'set.minPhrase': 'Мин. длина фразы (мс)',
@@ -93,7 +108,7 @@ export const ru: Record<string, string> = {
   'prov.mock': 'Мок (офлайн-тестирование)',
   'set.claudeModel': 'Модель Claude',
   'set.claudeModelHint':
-    'По умолчанию: claude-opus-4-8. Для меньшей задержки можно указать claude-haiku-4-5.',
+    'По умолчанию: claude-opus-5. Для меньшей задержки и цены — claude-sonnet-5 или claude-haiku-4-5.',
   'set.ttsVoice': 'Голос озвучки (OpenAI)',
   'set.apiKeys': 'API-ключи',
   'set.openaiKey': 'API-ключ OpenAI',
@@ -141,7 +156,8 @@ export const ru: Record<string, string> = {
   'ob.provMock': 'Мок-провайдер (без ключа, без настоящего перевода)',
   'ob.savedMark': '✓ сохранён',
   'ob.keySaved': 'Ключ сохранён.',
-  'ob.anthropicLater': 'Ключ Anthropic (если выбран) можно добавить позже в Настройках.',
+  'ob.openaiAlwaysNeeded':
+    'Ключ OpenAI нужен всегда — распознавание речи и голос работают через OpenAI.',
   'ob.translationTitle': 'Проверка перевода',
   'ob.testPhraseLabel': 'Тестовая фраза:',
   'ob.translateBtn': 'Перевести тестовую фразу',
