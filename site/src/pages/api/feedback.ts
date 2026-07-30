@@ -1,4 +1,5 @@
 import type { APIRoute } from 'astro'
+import { TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID, TURNSTILE_SECRET_KEY } from 'astro:env/server'
 import { clientKey, rateLimit } from '../../lib/rateLimit'
 
 export const prerender = false
@@ -81,12 +82,15 @@ function str(value: unknown): string {
 }
 
 export const POST: APIRoute = async ({ request, clientAddress }) => {
-  const env = import.meta.env
-  const isDev = env.DEV === true
+  // Secrets come from astro:env/server, declared in astro.config.mjs. They are
+  // read at runtime rather than inlined at build time, so a key rotated in the
+  // Vercel dashboard applies without a redeploy. import.meta.env.DEV is a
+  // build-time flag, which is what it should be.
+  const isDev = import.meta.env.DEV === true
 
-  const turnstileSecret = env.TURNSTILE_SECRET_KEY || (isDev ? TEST_SECRET : '')
-  const botToken = env.TELEGRAM_BOT_TOKEN
-  const chatId = env.TELEGRAM_CHAT_ID
+  const turnstileSecret = TURNSTILE_SECRET_KEY || (isDev ? TEST_SECRET : '')
+  const botToken = TELEGRAM_BOT_TOKEN
+  const chatId = TELEGRAM_CHAT_ID
 
   if (!turnstileSecret || !botToken || !chatId) {
     console.error(

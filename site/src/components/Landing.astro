@@ -1,4 +1,5 @@
 ---
+import { PUBLIC_TURNSTILE_SITE_KEY } from 'astro:env/client'
 import { ISSUES, RELEASES, type Locale } from '../i18n/ui'
 import { localePath, useTranslations } from '../i18n/utils'
 import CostEstimator from './CostEstimator.tsx'
@@ -22,7 +23,7 @@ const examples = [1, 2, 3, 4] as const
 // Cloudflare's documented always-passes test key, so the form is usable in
 // local development before real keys exist. Production must set the real one.
 const TURNSTILE_TEST_KEY = '1x00000000000000000000AA'
-const siteKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY || TURNSTILE_TEST_KEY
+const siteKey = PUBLIC_TURNSTILE_SITE_KEY || TURNSTILE_TEST_KEY
 
 const feedbackLabels = {
   kind: t('fb.kind'),

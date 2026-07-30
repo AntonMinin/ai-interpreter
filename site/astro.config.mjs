@@ -1,4 +1,4 @@
-import { defineConfig } from 'astro/config'
+import { defineConfig, envField } from 'astro/config'
 import preact from '@astrojs/preact'
 import sitemap from '@astrojs/sitemap'
 import vercel from '@astrojs/vercel'
@@ -26,11 +26,47 @@ export default defineConfig({
     })
   ],
 
+  // Secrets are declared here rather than read through import.meta.env, which
+  // Astro inlines at build time. `access: 'secret'` keeps them out of the
+  // bundle and reads them at runtime, so rotating a key in the Vercel
+  // dashboard takes effect without a redeploy. All optional, so a build with
+  // no keys still succeeds — the endpoint reports the misconfiguration itself.
+  env: {
+    schema: {
+      PUBLIC_TURNSTILE_SITE_KEY: envField.string({
+        context: 'client',
+        access: 'public',
+        optional: true
+      }),
+      TURNSTILE_SECRET_KEY: envField.string({
+        context: 'server',
+        access: 'secret',
+        optional: true
+      }),
+      TELEGRAM_BOT_TOKEN: envField.string({
+        context: 'server',
+        access: 'secret',
+        optional: true
+      }),
+      TELEGRAM_CHAT_ID: envField.string({
+        context: 'server',
+        access: 'secret',
+        optional: true
+      })
+    }
+  },
+
+  // Astro 7 defaults this to 'jsx', which strips whitespace between inline
+  // elements the way React does. The markup here was written and checked
+  // against the previous behaviour, so keep it rather than hunt for collapsed
+  // spaces. Revisit deliberately, not as a side effect of an upgrade.
+  compressHTML: true,
+
   // Astro emits script-src/style-src itself, with hashes for its own inline
   // hydration bootstrap. Everything else is listed here. Do not also send a
   // Content-Security-Policy header from vercel.json: two policies intersect,
   // and a header without these hashes would block island hydration.
-  experimental: {
+  security: {
     csp: {
       algorithm: 'SHA-256',
       // `resources` replaces Astro's default list, so 'self' must stay.
