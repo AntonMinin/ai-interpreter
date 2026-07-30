@@ -112,12 +112,19 @@ const toc = headings.filter((heading) => heading.depth === 2)
         <p class="mt-8 text-sm text-muted">
           {t('docs.editNote')}{' '}
           <a
+            href={`${localePath(locale)}#feedback`}
+            class="font-medium text-accent underline decoration-1 underline-offset-4 hover:text-fg"
+          >
+            {t('docs.editLink')}
+          </a>{' '}
+          <span class="text-muted/70">·</span>{' '}
+          <a
             href={`${GITHUB}/issues`}
             target="_blank"
             rel="noopener noreferrer"
             class="font-medium text-accent underline decoration-1 underline-offset-4 hover:text-fg"
           >
-            {t('docs.editLink')}
+            GitHub
           </a>
         </p>
       </article>

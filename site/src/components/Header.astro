@@ -14,6 +14,7 @@ const t = useTranslations(locale)
 const links = [
   { href: localePath(locale), label: t('nav.home') },
   { href: localePath(locale, 'docs/install'), label: t('nav.docs') },
+  { href: `${localePath(locale)}#feedback`, label: t('nav.feedback') },
   { href: GITHUB, label: t('nav.github'), external: true }
 ]
 const current = Astro.url.pathname

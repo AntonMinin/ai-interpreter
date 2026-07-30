@@ -50,6 +50,18 @@ The live transcript exists in the app's memory only and disappears when you clos
 
 If you want a record of a meeting, use your meeting platform's own recording — and remember that recording other people may legally require their consent where you are.
 
+## This website
+
+Everything above is about the app. The site you are reading has its own, much shorter story.
+
+No analytics, no tracking pixels, no cookies set by us, no CDN, no web fonts. Pages are static files.
+
+There is exactly one third party, and only on the page with the feedback form: **Cloudflare Turnstile**, the bot check. It loads from `challenges.cloudflare.com` and runs its own checks in an iframe; Cloudflare sees that request. It is there so the form does not need your email address or an account to keep spam out.
+
+If you send the form, what reaches the developer is what you typed, the category you picked, the interface language, and a contact if you chose to leave one. Nothing else — no IP address is stored, and there is no database on the site to store it in. Your address is used for one thing only: an in-memory counter that limits how many messages one address can send in a few minutes, which disappears on its own.
+
+You can skip the form entirely and [open a GitHub issue](https://github.com/AntonMinin/ai-interpreter/issues) instead — public, and no third-party check involved.
+
 ## Reporting a vulnerability
 
 Please report security issues privately rather than in a public issue: see [SECURITY.md](https://github.com/AntonMinin/ai-interpreter/blob/main/SECURITY.md).

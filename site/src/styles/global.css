@@ -11,6 +11,7 @@
   --color-accent-dim: #23904f;
   --color-info: #4fa3e0;
   --color-warn: #e0a94f;
+  --color-danger: #e05d5d;
 
   --font-sans: 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', sans-serif;
   --font-mono: 'Cascadia Mono', 'SF Mono', Menlo, Consolas, monospace;

@@ -175,7 +175,58 @@ export const ui = {
 
     'a11y.langSwitch': 'Change language',
     'a11y.mainNav': 'Main navigation',
-    'a11y.docsNav': 'Documentation navigation'
+    'a11y.docsNav': 'Documentation navigation',
+
+    'nav.feedback': 'Ask / suggest',
+    'fb.title': 'Ask something, or say what to improve',
+    'fb.lead':
+      'Stuck on a step, or spotted something that should work differently? Write it here. This goes straight to the developer — one person, so a specific message gets a much better answer than "it does not work".',
+    'fb.examplesTitle': 'What a useful message looks like',
+    'fb.ex1.kind': 'Question',
+    'fb.ex1.text':
+      'Where do I get the OpenAI key, and how much money should I put on the balance so it lasts a couple of meetings? I have never used an API before.',
+    'fb.ex2.kind': 'Suggestion',
+    'fb.ex2.text':
+      'Make the mute state visible in the tray. From inside the Zoom window I cannot tell whether the microphone is on, and I keep pressing the hotkey twice to be sure.',
+    'fb.ex3.kind': 'Bug',
+    'fb.ex3.text':
+      'Zoom does not list CABLE Output even though Diagnostics says the cable was found. Windows 11 24H2, reinstalled the driver twice. Log lines attached below.',
+    'fb.ex4.kind': 'Suggestion',
+    'fb.ex4.text':
+      'Let me save the transcript to a file after the meeting — I need it for minutes, and right now it disappears when I close the app.',
+
+    'fb.kind': 'What is this about',
+    'fb.kindQuestion': 'Question',
+    'fb.kindSuggestion': 'Suggestion',
+    'fb.kindBug': 'Something is broken',
+    'fb.message': 'Your message',
+    'fb.messagePlaceholder':
+      'Be specific: what you were doing, what you expected, what happened instead.',
+    'fb.contact': 'Contact (optional)',
+    'fb.contactHint':
+      'Email or a messenger handle, if you want an answer. Leave it empty to send anonymously — the message still arrives.',
+    'fb.submit': 'Send',
+    'fb.sending': 'Sending…',
+    'fb.sentTitle': 'Sent — thank you',
+    'fb.sentBody':
+      'It landed with the developer. If you left a contact you will get an answer; if not, it still gets read.',
+    'fb.sendAnother': 'Send another',
+    'fb.captchaPending': 'Complete the check above to enable sending.',
+    'fb.counter': '{n} / {max}',
+    'fb.errRateLimited':
+      'Too many messages from this address. Try again in a few minutes — or open a GitHub issue if it is urgent.',
+    'fb.errCaptcha': 'The check did not pass. Please try it again.',
+    'fb.errTooShort': 'A few more words, please — short messages are impossible to act on.',
+    'fb.errTooLong': 'That is too long. Trim it, or open a GitHub issue for the full detail.',
+    'fb.errServer':
+      'The form is broken on our side, not yours. Please open a GitHub issue instead — sorry about that.',
+    'fb.errNetwork': 'Could not reach the server. Check your connection and try again.',
+    'fb.privacyNote':
+      'Sends only what you typed. No account needed. The bot check is Cloudflare Turnstile, loaded only for this form — the one third party on this site.',
+    'fb.altTitle': 'Prefer GitHub?',
+    'fb.altBody':
+      'Issues are public, searchable and better for anything that needs back-and-forth or a file attached.',
+    'fb.altLink': 'Open an issue'
   },
 
   ru: {
@@ -342,7 +393,58 @@ export const ui = {
 
     'a11y.langSwitch': 'Сменить язык',
     'a11y.mainNav': 'Основная навигация',
-    'a11y.docsNav': 'Навигация по документации'
+    'a11y.docsNav': 'Навигация по документации',
+
+    'nav.feedback': 'Спросить',
+    'fb.title': 'Спросите или предложите, что улучшить',
+    'fb.lead':
+      'Застряли на каком-то шаге или заметили, что что-то должно работать иначе? Напишите здесь. Сообщение уходит напрямую разработчику — он один, поэтому на конкретное письмо ответ будет намного полезнее, чем на «не работает».',
+    'fb.examplesTitle': 'Как выглядит полезное сообщение',
+    'fb.ex1.kind': 'Вопрос',
+    'fb.ex1.text':
+      'Где взять ключ OpenAI и сколько денег положить на баланс, чтобы хватило на пару встреч? С API никогда раньше не работал.',
+    'fb.ex2.kind': 'Предложение',
+    'fb.ex2.text':
+      'Сделайте, чтобы состояние микрофона было видно в трее. Из окна Zoom не понять, включён он или нет, и я на всякий случай жму горячую клавишу дважды.',
+    'fb.ex3.kind': 'Баг',
+    'fb.ex3.text':
+      'Zoom не показывает CABLE Output, хотя диагностика пишет, что кабель найден. Windows 11 24H2, драйвер переставил дважды. Строки из лога прикладываю ниже.',
+    'fb.ex4.kind': 'Предложение',
+    'fb.ex4.text':
+      'Дайте сохранять расшифровку в файл после встречи — она нужна для протокола, а сейчас исчезает при закрытии приложения.',
+
+    'fb.kind': 'О чём сообщение',
+    'fb.kindQuestion': 'Вопрос',
+    'fb.kindSuggestion': 'Предложение',
+    'fb.kindBug': 'Что-то не работает',
+    'fb.message': 'Ваше сообщение',
+    'fb.messagePlaceholder':
+      'Конкретнее: что делали, чего ожидали и что получилось вместо этого.',
+    'fb.contact': 'Связь (необязательно)',
+    'fb.contactHint':
+      'Почта или ник в мессенджере, если хотите ответ. Можно оставить пустым и отправить анонимно — сообщение всё равно дойдёт.',
+    'fb.submit': 'Отправить',
+    'fb.sending': 'Отправляю…',
+    'fb.sentTitle': 'Отправлено, спасибо',
+    'fb.sentBody':
+      'Сообщение дошло до разработчика. Если вы оставили контакт — получите ответ; если нет, его всё равно прочитают.',
+    'fb.sendAnother': 'Отправить ещё',
+    'fb.captchaPending': 'Пройдите проверку выше, чтобы отправить.',
+    'fb.counter': '{n} / {max}',
+    'fb.errRateLimited':
+      'Слишком много сообщений с этого адреса. Попробуйте через несколько минут — или создайте issue на GitHub, если срочно.',
+    'fb.errCaptcha': 'Проверка не прошла. Пройдите её ещё раз.',
+    'fb.errTooShort': 'Добавьте пару слов — по слишком короткому сообщению ничего не сделать.',
+    'fb.errTooLong': 'Слишком длинно. Сократите или создайте issue на GitHub для полной истории.',
+    'fb.errServer':
+      'Форма сломалась на нашей стороне, не на вашей. Создайте, пожалуйста, issue на GitHub — извините.',
+    'fb.errNetwork': 'Не удалось связаться с сервером. Проверьте соединение и попробуйте снова.',
+    'fb.privacyNote':
+      'Отправляется только то, что вы написали. Аккаунт не нужен. Проверка на робота — Cloudflare Turnstile, он загружается только для этой формы и это единственный сторонний сервис на сайте.',
+    'fb.altTitle': 'Привычнее GitHub?',
+    'fb.altBody':
+      'Issues публичные, их можно искать, и они лучше подходят для долгого обсуждения или когда нужно приложить файл.',
+    'fb.altLink': 'Создать issue'
   }
 } as const satisfies Record<Locale, Record<string, string>>
 
