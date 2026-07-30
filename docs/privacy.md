@@ -1,6 +1,6 @@
 # Privacy & Security Notes
 
-AI Interpreter handles your live voice. This page states exactly what leaves your computer, when, and how to control it. The app is open source — you can verify every claim in the code (start at `src/main/providers/` and `src/renderer/src/pipeline/controller.ts`).
+AI Interpreter handles your live voice. This page states exactly what leaves your computer, when, and how to control it. The source is public — you can verify every claim in the code (start at `src/main/providers/` and `src/renderer/src/pipeline/controller.ts`). Note the licence is source-available, not open source: see [LICENSE](../LICENSE) for what you may do with it.
 
 ## What is sent to cloud AI providers, and when
 

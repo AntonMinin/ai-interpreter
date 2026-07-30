@@ -49,12 +49,19 @@ export function rateLimit(key: string, limit: number, windowMs: number): RateLim
 }
 
 /**
- * Client address as reported by the platform edge. On Vercel `x-forwarded-for`
- * is set by the proxy, and its first entry is the real client. Falls back to a
- * shared bucket rather than to something spoofable, so a missing header makes
- * the limit stricter instead of bypassing it.
+ * Bucket key for one client.
+ *
+ * Prefers the address the adapter resolved (`Astro.clientAddress`), because
+ * `x-forwarded-for` is a request header: a client can send its own value, and
+ * reading the first entry of it would let anyone pick their own bucket. The
+ * header is only a fallback for when the adapter cannot supply an address.
+ *
+ * With neither available everyone shares one bucket, which makes the limit
+ * stricter rather than bypassable — the safe direction to fail in.
  */
-export function clientKey(request: Request): string {
+export function clientKey(clientAddress: string | undefined, request: Request): string {
+  if (clientAddress && clientAddress.length > 0) return clientAddress
+
   const forwarded = request.headers.get('x-forwarded-for')
   const first = forwarded?.split(',')[0]?.trim()
   return first && first.length > 0 ? first : 'unknown'

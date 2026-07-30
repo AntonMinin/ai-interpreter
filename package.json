@@ -5,13 +5,13 @@
   "main": "out/main/index.js",
   "author": "Anton Minin Baranovskii",
   "license": "SEE LICENSE IN LICENSE",
-  "homepage": "https://github.com/anton-minin/ai-interpreter#readme",
+  "homepage": "https://github.com/AntonMinin/ai-interpreter#readme",
   "bugs": {
-    "url": "https://github.com/anton-minin/ai-interpreter/issues"
+    "url": "https://github.com/AntonMinin/ai-interpreter/issues"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/anton-minin/ai-interpreter.git"
+    "url": "https://github.com/AntonMinin/ai-interpreter.git"
   },
   "keywords": [
     "interpreter",

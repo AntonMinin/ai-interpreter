@@ -106,7 +106,7 @@ export const POST: APIRoute = async ({ request, clientAddress }) => {
     return fail('server_misconfigured', 500)
   }
 
-  const ip = clientKey(request) || clientAddress || 'unknown'
+  const ip = clientKey(clientAddress, request)
 
   // Rate limit before touching the captcha or Telegram, so a flood costs us
   // nothing downstream.
